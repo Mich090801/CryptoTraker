@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Comparar Criptomonedas</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: #ffffff;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: #1f1f1f;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+    }
+
+    header nav a {
+      color: #ccc;
+      margin: 0 1rem;
+      text-decoration: none;
+    }
+
+    header nav a:hover {
+      color: #fff;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 1rem;
+    }
+
+    .form-section {
+      margin-bottom: 2rem;
+    }
+
+    select, button {
+      background-color: #1f1f1f;
+      color: #fff;
+      border: 1px solid #444;
+      border-radius: 6px;
+      padding: 0.5rem;
+      font-size: 1rem;
+      margin: 0.3rem;
+    }
+
+    .chart {
+      background-color: #1e1e1e;
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+
+    .chart img {
+      width: 100%;
+      max-height: 450px;
+      object-fit: contain;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>🪙 CryptoTracker</h1>
+    <nav>
+      <a href="index.html">Inicio</a>
+      <a href="#">Gráficas por Cripto</a>
+      <a href="#">Comparación</a>
+      <a href="#">Regresión</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <h2>Comparar Variación de Criptomonedas</h2>
+
+    <div class="form-section">
+      <label for="crypto-select">Selecciona criptomonedas:</label><br>
+      <select id="crypto-select" multiple size="5">
+        <option value="BTC">Bitcoin (BTC)</option>
+        <option value="ETH">Ethereum (ETH)</option>
+        <option value="USDT">Tether (USDT)</option>
+        <option value="ADA">Cardano (ADA)</option>
+        <option value="SOL">Solana (SOL)</option>
+        <option value="XRP">XRP</option>
+        <option value="USDC">USD Coin (USDC)</option>
+        <option value="DOGE">Dogecoin (DOGE)</option>
+        <option value="AVAX">Avalanche (AVAX)</option>
+        <option value="DOT">Polkadot (DOT)</option>
+      </select>
+    </div>
+
+    <div class="form-section">
+      <label for="range">Intervalo en horas:</label><br>
+      <select id="range">
+        <option value="1">1 hora</option>
+        <option value="3">3 horas</option>
+        <option value="6">6 horas</option>
+        <option value="12">12 horas</option>
+        <option value="24" selected>24 horas</option>
+      </select>
+    </div>
+
+    <button onclick="generateChart()">Generar gráfico</button>
+
+    <div class="chart" style="margin-top: 2rem;">
+      <img id="chart-img" src="https://via.placeholder.com/800x400?text=Selecciona+criptos+e+intervalo" alt="Gráfico de comparación">
+    </div>
+  </div>
+
+  <script>
+    function generateChart() {
+      const selected = Array.from(document.getElementById('crypto-select').selectedOptions).map(o => o.value);
+      const hours = document.getElementById('range').value;
+      if (selected.length === 0) {
+        alert('Selecciona al menos una criptomoneda.');
+        return;
+      }
+
+      const coins = selected.join(',');
+      const url = `http://localhost:8080/compare?coins=${coins}&hours=${hours}`;
+      document.getElementById('chart-img').src = url;
+    }
+  </script>
+
+</body>
+</html>

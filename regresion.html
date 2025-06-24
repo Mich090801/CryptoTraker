@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Regresión Lineal</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: #ffffff;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: #1f1f1f;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+    }
+
+    header nav a {
+      color: #ccc;
+      margin: 0 1rem;
+      text-decoration: none;
+    }
+
+    header nav a:hover {
+      color: #fff;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: auto;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 1rem;
+    }
+
+    .form-section {
+      margin-bottom: 1.5rem;
+    }
+
+    select {
+      background-color: #1f1f1f;
+      color: #fff;
+      border: 1px solid #444;
+      border-radius: 6px;
+      padding: 0.5rem;
+      font-size: 1rem;
+      margin: 0.3rem;
+    }
+
+    .chart {
+      background-color: #1e1e1e;
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      margin-top: 2rem;
+    }
+
+    .chart img {
+      width: 100%;
+      max-height: 400px;
+      object-fit: contain;
+    }
+
+    .equation {
+      margin-top: 1rem;
+      font-size: 1.1rem;
+      color: #66ccff;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>🪙 CryptoTracker</h1>
+    <nav>
+      <a href="index.html">Inicio</a>
+      <a href="#">Gráficas por Cripto</a>
+      <a href="#">Comparación</a>
+      <a href="#">Regresión</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <h2>Regresión Lineal de Criptomoneda</h2>
+
+    <div class="form-section">
+      <label for="coin">Criptomoneda:</label>
+      <select id="coin">
+        <option value="BTC">Bitcoin (BTC)</option>
+        <option value="ETH">Ethereum (ETH)</option>
+        <option value="ADA">Cardano (ADA)</option>
+        <option value="SOL">Solana (SOL)</option>
+        <option value="DOGE">Dogecoin (DOGE)</option>
+      </select>
+    </div>
+
+    <div class="form-section">
+      <label for="start">Hora de inicio:</label>
+      <select id="start">
+        <option value="0">00:00</option>
+        <option value="1">01:00</option>
+        <option value="2">02:00</option>
+        <option value="3">03:00</option>
+        <option value="4">04:00</option>
+        <option value="5">05:00</option>
+        <option value="6">06:00</option>
+        <option value="7">07:00</option>
+        <option value="8">08:00</option>
+        <option value="9">09:00</option>
+        <option value="10">10:00</option>
+        <option value="11">11:00</option>
+        <option value="12">12:00</option>
+        <option value="13">13:00</option>
+        <option value="14">14:00</option>
+        <option value="15">15:00</option>
+        <option value="16">16:00</option>
+        <option value="17">17:00</option>
+        <option value="18">18:00</option>
+        <option value="19">19:00</option>
+        <option value="20">20:00</option>
+        <option value="21">21:00</option>
+        <option value="22">22:00</option>
+        <option value="23">23:00</option>
+      </select>
+
+      <label for="end">Hora de fin:</label>
+      <select id="end">
+        <!-- mismo rango, inicia en 1 para evitar superposición inicial -->
+        <option value="1">01:00</option>
+        <option value="2">02:00</option>
+        <option value="3">03:00</option>
+        <option value="4">04:00</option>
+        <option value="5">05:00</option>
+        <option value="6">06:00</option>
+        <option value="7">07:00</option>
+        <option value="8">08:00</option>
+        <option value="9">09:00</option>
+        <option value="10" selected>10:00</option>
+        <option value="11">11:00</option>
+        <option value="12">12:00</option>
+        <option value="13">13:00</option>
+        <option value="14">14:00</option>
+        <option value="15">15:00</option>
+        <option value="16">16:00</option>
+        <option value="17">17:00</option>
+        <option value="18">18:00</option>
+        <option value="19">19:00</option>
+        <option value="20">20:00</option>
+        <option value="21">21:00</option>
+        <option value="22">22:00</option>
+        <option value="23">23:00</option>
+      </select>
+    </div>
+
+    <button onclick="generateRegression()">Ver regresión</button>
+
+    <div class="chart">
+      <img id="regression-img" src="https://via.placeholder.com/800x400?text=Regresión+no+generada" alt="Gráfico de regresión">
+      <div class="equation" id="equation-text">Ecuación pendiente...</div>
+    </div>
+  </div>
+
+  <script>
+    function generateRegression() {
+      const coin = document.getElementById('coin').value;
+      const start = document.getElementById('start').value;
+      const end = document.getElementById('end').value;
+
+      if (parseInt(end) <= parseInt(start)) {
+        alert("La hora de fin debe ser mayor que la hora de inicio");
+        return;
+      }
+
+      const imgUrl = `http://localhost:8080/regression?coin=${coin}&start=${start}&end=${end}`;
+      document.getElementById('regression-img').src = imgUrl;
+
+      // Simular carga de ecuación con otro endpoint
+      fetch(`http://localhost:8080/equation?coin=${coin}&start=${start}&end=${end}`)
+        .then(res => res.text())
+        .then(equation => {
+          document.getElementById('equation-text').innerText = `Ecuación de la recta: ${equation}`;
+        });
+    }
+  </script>
+
+</body>
+</html>

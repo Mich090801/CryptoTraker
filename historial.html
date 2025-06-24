@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Historial de Criptomoneda</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: #ffffff;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: #1f1f1f;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2rem;
+    }
+
+    header h1 {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.5rem;
+    }
+
+    header nav a {
+      color: #ccc;
+      margin: 0 1rem;
+      text-decoration: none;
+    }
+
+    header nav a:hover {
+      color: #fff;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: auto;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .crypto-info {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .crypto-info img {
+      width: 50px;
+      height: 50px;
+    }
+
+    .select-hours {
+      margin-bottom: 1.5rem;
+    }
+
+    .select-hours select {
+      padding: 0.5rem;
+      font-size: 1rem;
+      background-color: #1f1f1f;
+      color: #fff;
+      border: 1px solid #444;
+      border-radius: 6px;
+    }
+
+    .chart {
+      background-color: #1e1e1e;
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+
+    .chart img {
+      width: 100%;
+      max-height: 400px;
+      object-fit: contain;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>🪙 CryptoTracker</h1>
+    <nav>
+      <a href="index.html">Inicio</a>
+      <a href="#">Gráficas por Cripto</a>
+      <a href="#">Comparación</a>
+      <a href="#">Regresión</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <div class="crypto-info">
+      <img src="https://cryptologos.cc/logos/bitcoin-btc-logo.png" alt="Bitcoin">
+      <h2>Bitcoin (BTC)</h2>
+    </div>
+
+    <div class="select-hours">
+      <label for="range">Selecciona un rango de horas:</label>
+      <select id="range">
+        <!-- Puedes hacer esto dinámico con JS si lo deseas -->
+        <option value="1">Última 1 hora</option>
+        <option value="3">Últimas 3 horas</option>
+        <option value="6">Últimas 6 horas</option>
+        <option value="12">Últimas 12 horas</option>
+        <option value="24" selected>Últimas 24 horas</option>
+      </select>
+    </div>
+
+    <div class="chart">
+      <img id="chart-img" src="https://fake-api.localhost/chart/BTC/24" alt="Gráfico histórico de BTC">
+    </div>
+  </div>
+
+  <script>
+    const rangeSelect = document.getElementById('range');
+    const chartImg = document.getElementById('chart-img');
+    const cryptoSymbol = 'BTC'; // dinámico si lo deseas
+
+    rangeSelect.addEventListener('change', () => {
+      const hours = rangeSelect.value;
+      chartImg.src = `http://localhost:8080/chart?coin=${cryptoSymbol}&hours=${hours}`;
+    });
+  </script>
+
+</body>
+</html>

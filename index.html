@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>CryptoTracker Web</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #121212;
+      color: #ffffff;
+    }
+
+    header {
+      background: linear-gradient(to right, #1a1a1a, #2d2d2d);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid #383838;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    .logo-container img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: contain;
+      filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.2));
+    }
+
+    header h1 {
+      display: flex;
+      align-items: center;
+      font-size: 1.6rem;
+      font-weight: 600;
+      margin: 0;
+      background: linear-gradient(to right, #fff, #ccc);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    header nav {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    header nav a {
+      color: #ccc;
+      margin: 0 1.2rem;
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      position: relative;
+      padding: 6px 0;
+    }
+
+    header nav a::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(to right, #9c27b0, #3f51b5);
+      transition: width 0.3s ease;
+    }
+
+    header nav a:hover {
+      color: #fff;
+    }
+
+    header nav a:hover::after {
+      width: 100%;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .moon {
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 50%;
+      background-color: #333;
+      transition: all 0.3s ease;
+    }
+
+    .moon:hover {
+      background-color: #444;
+      transform: rotate(360deg);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 2rem;
+    }
+
+    .title {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .card {
+      background-color: #1e1e1e;
+      border-radius: 12px;
+      padding: 1rem;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+      text-align: center;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.6);
+      background-color: #252525;
+    }
+    
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 0;
+      background: linear-gradient(45deg, var(--coin-color, #9c27b0), rgba(63, 81, 181, 0.7));
+      transition: height 0.3s ease;
+    }
+    
+    .card:hover::before {
+      height: 100%;
+    }
+
+    .card img {
+      width: 40px;
+      height: 40px;
+      margin-bottom: 0.5rem;
+      transition: transform 0.3s ease;
+      object-fit: contain;
+      filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.2));
+      padding: 5px;
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    .card:hover img {
+      transform: scale(1.2);
+      filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.4));
+    }
+
+    .card h2 {
+      font-size: 1.2rem;
+      margin: 0.2rem 0;
+      transition: color 0.3s ease;
+    }
+    
+    .card:hover h2 {
+      color: #fff;
+    }
+
+    .card p {
+      margin: 0.2rem 0;
+      font-size: 1rem;
+      color: #ccc;
+      transition: color 0.3s ease;
+    }
+    
+    .card:hover p {
+      color: #fff;
+    }
+
+    .card button {
+      margin-top: 1rem;
+      padding: 0.4rem 1rem;
+      background-color: #333;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    .card button:hover {
+      background-color: #555;
+      transform: scale(1.05);
+    }
+    
+    .card button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.7s ease;
+      z-index: -1;
+    }
+    
+    .card:hover button::before {
+      left: 100%;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo-container">
+      <img src="assets/logo.png" alt="CryptoTracker Logo" />
+      <h1>CryptoTracker</h1>
+    </div>
+    <nav>
+      <a href="#">Inicio</a>
+      <a href="#">Gráficas por Cripto</a>
+      <a href="#">Comparación</a>
+      <a href="#">Regresión</a>
+    </nav>
+    <div class="controls">
+      <div class="moon">🌙</div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="title">Precios actuales de criptomonedas</div>
+    <div class="cards" id="crypto-cards">
+      <!-- Tarjetas de criptomonedas se llenarán con JS -->
+    </div>
+  </div>
+
+  <script>
+    // Datos actualizados con las criptomonedas solicitadas usando los nombres correctos de archivos
+    const mockData = [
+      { name: 'Bitcoin', price: '64123.45', logo: 'assets/bitcoin-svgrepo-com.svg', symbol: 'BTC', time: '09:58 AM', color: '#f7931a' },
+      { name: 'Ethereum', price: '3456.78', logo: 'assets/ethereum-cryptocurrency-svgrepo-com.svg', symbol: 'ETH', time: '09:58 AM', color: '#627eea' },
+      { name: 'XRP', price: '1.23', logo: 'assets/xrp-svgrepo-com.svg', symbol: 'XRP', time: '09:58 AM', color: '#23292f' },
+      { name: 'Solana', price: '150.67', logo: 'assets/solana-svgrepo-com.svg', symbol: 'SOL', time: '09:58 AM', color: '#14f195' },
+      { name: 'TRON', price: '0.12', logo: 'assets/tron-crypto-svgrepo-com.svg', symbol: 'TRX', time: '09:58 AM', color: '#ff0013' },
+      { name: 'Dogecoin', price: '0.15', logo: 'assets/doge-svgrepo-com.svg', symbol: 'DOGE', time: '09:58 AM', color: '#c3a634' },
+      { name: 'Cardano', price: '0.45', logo: 'assets/cardano-logo-svgrepo-com.svg', symbol: 'ADA', time: '09:58 AM', color: '#0033ad' },
+      { name: 'Hyperliquid', price: '2.34', logo: 'assets/hyperliquid.svg', symbol: 'HLQ', time: '09:58 AM', color: '#23a2ee' },
+      { name: 'Bitcoin Cash', price: '354.78', logo: 'assets/bitcoin-circle-svgrepo-com.svg', symbol: 'BCH', time: '09:58 AM', color: '#8dc351' },
+      { name: 'Chainlink', price: '14.56', logo: 'assets/chainlink-svgrepo-com.svg', symbol: 'LINK', time: '09:58 AM', color: '#2a5ada' }
+    ];
+
+    const container = document.getElementById("crypto-cards");
+    mockData.forEach((coin, index) => {
+      container.innerHTML += `
+        <div class="card" id="card-${index}" style="--coin-color: ${coin.color}">
+          <img src="${coin.logo}" alt="${coin.name} logo" onerror="this.src='https://via.placeholder.com/40x40?text=${coin.symbol}'"/>
+          <h2>${coin.name}</h2>
+          <p>$${coin.price}</p>
+          <p>${coin.time}</p>
+          <button>Ver historial</button>
+        </div>`;
+    });
+  </script>
+</body>
+</html>
