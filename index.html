@@ -135,13 +135,13 @@
       overflow: hidden;
       cursor: pointer;
     }
-    
+
     .card:hover {
       transform: translateY(-5px);
       box-shadow: 0 8px 15px rgba(0, 0, 0, 0.6);
       background-color: #252525;
     }
-    
+
     .card::before {
       content: '';
       position: absolute;
@@ -152,7 +152,7 @@
       background: linear-gradient(45deg, var(--coin-color, #9c27b0), rgba(63, 81, 181, 0.7));
       transition: height 0.3s ease;
     }
-    
+
     .card:hover::before {
       height: 100%;
     }
@@ -168,7 +168,7 @@
       border-radius: 50%;
       background-color: rgba(255, 255, 255, 0.05);
     }
-    
+
     .card:hover img {
       transform: scale(1.2);
       filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.4));
@@ -179,7 +179,7 @@
       margin: 0.2rem 0;
       transition: color 0.3s ease;
     }
-    
+
     .card:hover h2 {
       color: #fff;
     }
@@ -190,7 +190,7 @@
       color: #ccc;
       transition: color 0.3s ease;
     }
-    
+
     .card:hover p {
       color: #fff;
     }
@@ -213,7 +213,7 @@
       background-color: #555;
       transform: scale(1.05);
     }
-    
+
     .card button::before {
       content: '';
       position: absolute;
@@ -225,7 +225,7 @@
       transition: left 0.7s ease;
       z-index: -1;
     }
-    
+
     .card:hover button::before {
       left: 100%;
     }
@@ -238,10 +238,10 @@
       <h1>CryptoTracker</h1>
     </div>
     <nav>
-      <a href="#">Inicio</a>
-      <a href="#">Gráficas por Cripto</a>
-      <a href="#">Comparación</a>
-      <a href="#">Regresión</a>
+      <a href="index.html">Inicio</a>
+      <a href="historial.html">Gráficas por Cripto</a>
+      <a href="comparar.html">Comparación</a>
+      <a href="regresion.html">Regresión</a>
     </nav>
     <div class="controls">
       <div class="moon">🌙</div>
@@ -251,36 +251,55 @@
   <div class="container">
     <div class="title">Precios actuales de criptomonedas</div>
     <div class="cards" id="crypto-cards">
-      <!-- Tarjetas de criptomonedas se llenarán con JS -->
+      <!-- Datos reales se cargarán desde /prices -->
     </div>
   </div>
+<script>
+  fetch("http://localhost:8080/prices")
+    .then(res => {
+      if (!res.ok) {
+        throw new Error(`Error HTTP ${res.status}`);
+      }
+      return res.json();
+    })
+    .then(data => {
+      console.log("Datos de criptomonedas recibidos:", data); // Log para verificar los datos
+      const container = document.getElementById("crypto-cards");
+      container.innerHTML = "";
 
-  <script>
-    // Datos actualizados con las criptomonedas solicitadas usando los nombres correctos de archivos
-    const mockData = [
-      { name: 'Bitcoin', price: '64123.45', logo: 'assets/bitcoin-svgrepo-com.svg', symbol: 'BTC', time: '09:58 AM', color: '#f7931a' },
-      { name: 'Ethereum', price: '3456.78', logo: 'assets/ethereum-cryptocurrency-svgrepo-com.svg', symbol: 'ETH', time: '09:58 AM', color: '#627eea' },
-      { name: 'XRP', price: '1.23', logo: 'assets/xrp-svgrepo-com.svg', symbol: 'XRP', time: '09:58 AM', color: '#23292f' },
-      { name: 'Solana', price: '150.67', logo: 'assets/solana-svgrepo-com.svg', symbol: 'SOL', time: '09:58 AM', color: '#14f195' },
-      { name: 'TRON', price: '0.12', logo: 'assets/tron-crypto-svgrepo-com.svg', symbol: 'TRX', time: '09:58 AM', color: '#ff0013' },
-      { name: 'Dogecoin', price: '0.15', logo: 'assets/doge-svgrepo-com.svg', symbol: 'DOGE', time: '09:58 AM', color: '#c3a634' },
-      { name: 'Cardano', price: '0.45', logo: 'assets/cardano-logo-svgrepo-com.svg', symbol: 'ADA', time: '09:58 AM', color: '#0033ad' },
-      { name: 'Hyperliquid', price: '2.34', logo: 'assets/hyperliquid.svg', symbol: 'HLQ', time: '09:58 AM', color: '#23a2ee' },
-      { name: 'Bitcoin Cash', price: '354.78', logo: 'assets/bitcoin-circle-svgrepo-com.svg', symbol: 'BCH', time: '09:58 AM', color: '#8dc351' },
-      { name: 'Chainlink', price: '14.56', logo: 'assets/chainlink-svgrepo-com.svg', symbol: 'LINK', time: '09:58 AM', color: '#2a5ada' }
-    ];
+      if (data.length === 0) {
+        container.innerHTML = "<p>No se encontraron criptomonedas en la base de datos.</p>";
+        return;
+      }
 
-    const container = document.getElementById("crypto-cards");
-    mockData.forEach((coin, index) => {
-      container.innerHTML += `
-        <div class="card" id="card-${index}" style="--coin-color: ${coin.color}">
-          <img src="${coin.logo}" alt="${coin.name} logo" onerror="this.src='https://via.placeholder.com/40x40?text=${coin.symbol}'"/>
-          <h2>${coin.name}</h2>
-          <p>$${coin.price}</p>
-          <p>${coin.time}</p>
-          <button>Ver historial</button>
-        </div>`;
+      data.forEach((coin, index) => {
+        // Asegúrate de que coin.id existe, de lo contrario usa un valor alternativo
+        const coinId = coin.id || coin.symbol || coin.name.toLowerCase().replace(' ', '-');
+        console.log(`Moneda ${index}: ${coin.name}, ID: ${coinId}`); // Log para verificar cada ID
+        
+        container.innerHTML += `
+          <div class="card" id="card-${index}" style="--coin-color: #3f51b5">
+            <img src="${coin.image}" alt="${coin.name} logo" />
+            <h2>${coin.name}</h2>
+            <p>$${coin.current_price}</p>
+            <p>${coin.last_updated}</p>
+            <button onclick="verHistorial('${coinId}')">Ver historial</button>
+          </div>`;
+      });
+    })
+    .catch(error => {
+      console.error("Error al obtener datos:", error);
+      document.getElementById("crypto-cards").innerHTML = `
+        <p style="color: red;">❌ No se pudieron cargar los datos. Revisa que el servidor esté activo en <code>http://localhost:8080/prices</code></p>
+      `;
     });
-  </script>
+    
+  // Función para redirigir al historial de una criptomoneda específica
+  function verHistorial(coinId) {
+    console.log(`Redirigiendo a historial de: ${coinId}`); // Log para verificar la redirección
+    window.location.href = `historial.html?coin=${coinId}`;
+  }
+</script>
+
 </body>
 </html>

@@ -82,6 +82,30 @@
       max-height: 400px;
       object-fit: contain;
     }
+
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #444;
+    }
+
+    th {
+      background-color: #1f1f1f;
+    }
+
+    tr:nth-child(even) {
+      background-color: #1a1a1a;
+    }
+
+    tr:nth-child(odd) {
+      background-color: #222;
+    }
   </style>
 </head>
 <body>
@@ -90,22 +114,21 @@
     <h1>🪙 CryptoTracker</h1>
     <nav>
       <a href="index.html">Inicio</a>
-      <a href="#">Gráficas por Cripto</a>
-      <a href="#">Comparación</a>
-      <a href="#">Regresión</a>
+      <a href="historial.html">Gráficas por Cripto</a>
+      <a href="comparar.html">Comparación</a>
+      <a href="regresion.html">Regresión</a>
     </nav>
   </header>
 
   <div class="container">
     <div class="crypto-info">
       <img src="https://cryptologos.cc/logos/bitcoin-btc-logo.png" alt="Bitcoin">
-      <h2>Bitcoin (BTC)</h2>
+      <h2 id="coin-name">Bitcoin (BTC)</h2>
     </div>
 
     <div class="select-hours">
       <label for="range">Selecciona un rango de horas:</label>
       <select id="range">
-        <!-- Puedes hacer esto dinámico con JS si lo deseas -->
         <option value="1">Última 1 hora</option>
         <option value="3">Últimas 3 horas</option>
         <option value="6">Últimas 6 horas</option>
@@ -115,19 +138,128 @@
     </div>
 
     <div class="chart">
-      <img id="chart-img" src="https://fake-api.localhost/chart/BTC/24" alt="Gráfico histórico de BTC">
+      <img id="chart-img" src="http://localhost:8080/chart?coin=bitcoin&hours=24" alt="Gráfico histórico de BTC">
     </div>
+
+    <div id="chart-container"></div>
   </div>
 
   <script>
-    const rangeSelect = document.getElementById('range');
-    const chartImg = document.getElementById('chart-img');
-    const cryptoSymbol = 'BTC'; // dinámico si lo deseas
-
-    rangeSelect.addEventListener('change', () => {
-      const hours = rangeSelect.value;
-      chartImg.src = `http://localhost:8080/chart?coin=${cryptoSymbol}&hours=${hours}`;
+    document.addEventListener('DOMContentLoaded', () => {
+      // Obtener el parámetro 'coin' de la URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const coinId = urlParams.get('coin') || 'bitcoin'; // Usa bitcoin como valor predeterminado
+      
+      console.log(`Mostrando historial para: ${coinId}`);
+      
+      // Actualizar el título y la imagen con la criptomoneda seleccionada
+      updateCryptoInfo(coinId);
+      
+      // Actualizar la imagen del gráfico con la criptomoneda seleccionada
+      const hours = document.getElementById('range').value;
+      document.getElementById('chart-img').src = `http://localhost:8080/chart?coin=${coinId}&hours=${hours}`;
+      
+      // Configurar el event listener para el cambio de rango
+      const rangeSelect = document.getElementById('range');
+      rangeSelect.addEventListener('change', () => {
+        const hours = rangeSelect.value;
+        document.getElementById('chart-img').src = `http://localhost:8080/chart?coin=${coinId}&hours=${hours}`;
+      });
+      
+      // Cargar los datos históricos para la criptomoneda específica
+      fetch(`http://localhost:8080/history?coin=${coinId}&hours=${hours}`)
+        .then(res => {
+          if (!res.ok) {
+            throw new Error(`Error HTTP ${res.status}`);
+          }
+          return res.json();
+        })
+        .then(data => {
+          console.log("Datos históricos recibidos:", data);
+          
+          // Crear una tabla para mostrar los datos históricos
+          let tableHtml = `
+            <h3>Historial de precios para ${coinId}</h3>
+            <table style="width:100%; margin-top:20px; border-collapse:collapse;">
+              <thead>
+                <tr style="background-color:#1f1f1f;">
+                  <th style="padding:10px; text-align:left; border-bottom:1px solid #444;">Fecha/Hora</th>
+                  <th style="padding:10px; text-align:right; border-bottom:1px solid #444;">Precio (USD)</th>
+                </tr>
+              </thead>
+              <tbody>
+          `;
+          
+          if (data.length === 0) {
+            tableHtml += `
+              <tr>
+                <td colspan="2" style="padding:10px; text-align:center;">No hay datos disponibles</td>
+              </tr>
+            `;
+          } else {
+            data.forEach((point, index) => {
+              // Formatear la fecha
+              const date = new Date(point.timestamp);
+              const formattedDate = date.toLocaleString();
+              
+              // Formatear el precio con 2 decimales
+              const formattedPrice = point.price.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+              });
+              
+              // Alternar colores de fila para mejor legibilidad
+              const rowColor = index % 2 === 0 ? '#1a1a1a' : '#222';
+              
+              tableHtml += `
+                <tr style="background-color:${rowColor};">
+                  <td style="padding:10px; border-bottom:1px solid #333;">${formattedDate}</td>
+                  <td style="padding:10px; text-align:right; border-bottom:1px solid #333;">$${formattedPrice}</td>
+                </tr>
+              `;
+            });
+          }
+          
+          tableHtml += `
+              </tbody>
+            </table>
+          `;
+          
+          document.getElementById('chart-container').innerHTML = tableHtml;
+        })
+        .catch(error => {
+          console.error("Error al obtener datos históricos:", error);
+          document.getElementById('chart-container').innerHTML = 
+            `<p style="color: red;">❌ No se pudieron cargar los datos históricos para ${coinId}. Error: ${error.message}</p>`;
+        });
     });
+
+    // Función para actualizar la información de la criptomoneda
+    function updateCryptoInfo(coinId) {
+      // Mapeo de IDs a nombres y símbolos (puedes expandir esto según sea necesario)
+      const cryptoInfo = {
+        'bitcoin': { name: 'Bitcoin', symbol: 'BTC', logo: 'https://cryptologos.cc/logos/bitcoin-btc-logo.png' },
+        'ethereum': { name: 'Ethereum', symbol: 'ETH', logo: 'https://cryptologos.cc/logos/ethereum-eth-logo.png' },
+        'dogecoin': { name: 'Dogecoin', symbol: 'DOGE', logo: 'https://cryptologos.cc/logos/dogecoin-doge-logo.png' },
+        'cardano': { name: 'Cardano', symbol: 'ADA', logo: 'https://cryptologos.cc/logos/cardano-ada-logo.png' },
+        'solana': { name: 'Solana', symbol: 'SOL', logo: 'https://cryptologos.cc/logos/solana-sol-logo.png' },
+        'ripple': { name: 'XRP', symbol: 'XRP', logo: 'https://cryptologos.cc/logos/xrp-xrp-logo.png' },
+        'chainlink': { name: 'Chainlink', symbol: 'LINK', logo: 'https://cryptologos.cc/logos/chainlink-link-logo.png' },
+        'bitcoin-cash': { name: 'Bitcoin Cash', symbol: 'BCH', logo: 'https://cryptologos.cc/logos/bitcoin-cash-bch-logo.png' },
+        'hyperliquid': { name: 'Hyperliquid', symbol: 'HYP', logo: 'https://via.placeholder.com/150' },
+        'tron': { name: 'Tron', symbol: 'TRX', logo: 'https://cryptologos.cc/logos/tron-trx-logo.png' }
+      };
+
+      // Obtener información para la moneda seleccionada o usar valores predeterminados
+      const info = cryptoInfo[coinId] || { name: coinId, symbol: coinId.toUpperCase(), logo: 'https://via.placeholder.com/150' };
+      
+      // Actualizar la interfaz con la información de la criptomoneda
+      document.querySelector('.crypto-info img').src = info.logo;
+      document.getElementById('coin-name').textContent = `${info.name} (${info.symbol})`;
+      
+      // Actualizar el título del gráfico
+      document.querySelector('.chart img').alt = `Gráfico histórico de ${info.symbol}`;
+    }
   </script>
 
 </body>

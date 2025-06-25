@@ -5,7 +5,7 @@
   <title>Regresión Lineal</title>
   <style>
     body {
-      background-color: #121212;
+      background-color: #121212; 
       color: #ffffff;
       font-family: 'Segoe UI', sans-serif;
       margin: 0;
@@ -86,8 +86,8 @@
     <h1>🪙 CryptoTracker</h1>
     <nav>
       <a href="index.html">Inicio</a>
-      <a href="#">Gráficas por Cripto</a>
-      <a href="#">Comparación</a>
+      <a href="historial.html">Gráficas por Cripto</a>
+      <a href="comparar.html">Comparación</a>
       <a href="#">Regresión</a>
     </nav>
   </header>
@@ -98,11 +98,16 @@
     <div class="form-section">
       <label for="coin">Criptomoneda:</label>
       <select id="coin">
-        <option value="BTC">Bitcoin (BTC)</option>
-        <option value="ETH">Ethereum (ETH)</option>
-        <option value="ADA">Cardano (ADA)</option>
-        <option value="SOL">Solana (SOL)</option>
-        <option value="DOGE">Dogecoin (DOGE)</option>
+        <option value="bitcoin">Bitcoin (BTC)</option>
+        <option value="ethereum">Ethereum (ETH)</option>
+        <option value="cardano">Cardano (ADA)</option>
+        <option value="solana">Solana (SOL)</option>
+        <option value="dogecoin">Dogecoin (DOGE)</option>
+        <option value="ripple">XRP</option>
+        <option value="chainlink">Chainlink (LINK)</option>
+        <option value="bitcoin-cash">Bitcoin Cash</option>
+        <option value="hyperliquid">Hyperliquid</option>
+        <option value="tron">Tron (TRX)</option>
       </select>
     </div>
 
@@ -124,7 +129,7 @@
         <option value="12">12:00</option>
         <option value="13">13:00</option>
         <option value="14">14:00</option>
-        <option value="15">15:00</option>
+        <option value="15" selected>15:00</option>
         <option value="16">16:00</option>
         <option value="17">17:00</option>
         <option value="18">18:00</option>
@@ -137,7 +142,6 @@
 
       <label for="end">Hora de fin:</label>
       <select id="end">
-        <!-- mismo rango, inicia en 1 para evitar superposición inicial -->
         <option value="1">01:00</option>
         <option value="2">02:00</option>
         <option value="3">03:00</option>
@@ -147,13 +151,13 @@
         <option value="7">07:00</option>
         <option value="8">08:00</option>
         <option value="9">09:00</option>
-        <option value="10" selected>10:00</option>
+        <option value="10">10:00</option>
         <option value="11">11:00</option>
         <option value="12">12:00</option>
         <option value="13">13:00</option>
         <option value="14">14:00</option>
         <option value="15">15:00</option>
-        <option value="16">16:00</option>
+        <option value="16" selected>16:00</option>
         <option value="17">17:00</option>
         <option value="18">18:00</option>
         <option value="19">19:00</option>
@@ -168,7 +172,6 @@
 
     <div class="chart">
       <img id="regression-img" src="https://via.placeholder.com/800x400?text=Regresión+no+generada" alt="Gráfico de regresión">
-      <div class="equation" id="equation-text">Ecuación pendiente...</div>
     </div>
   </div>
 
@@ -185,13 +188,6 @@
 
       const imgUrl = `http://localhost:8080/regression?coin=${coin}&start=${start}&end=${end}`;
       document.getElementById('regression-img').src = imgUrl;
-
-      // Simular carga de ecuación con otro endpoint
-      fetch(`http://localhost:8080/equation?coin=${coin}&start=${start}&end=${end}`)
-        .then(res => res.text())
-        .then(equation => {
-          document.getElementById('equation-text').innerText = `Ecuación de la recta: ${equation}`;
-        });
     }
   </script>
 
