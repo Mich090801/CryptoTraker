@@ -146,27 +146,50 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // Obtener el parámetro 'coin' de la URL
+      // Obtener parámetros de la URL
       const urlParams = new URLSearchParams(window.location.search);
-      const coinId = urlParams.get('coin') || 'bitcoin'; // Usa bitcoin como valor predeterminado
+      const coinId = urlParams.get('coin') || 'bitcoin';
+      const iconSrc = urlParams.get('icon');
+      const coinName = urlParams.get('name');
+      const coinSymbol = urlParams.get('symbol');
       
       console.log(`Mostrando historial para: ${coinId}`);
       
-      // Actualizar el título y la imagen con la criptomoneda seleccionada
-      updateCryptoInfo(coinId);
+      // Si tenemos todos los parámetros necesarios, usarlos directamente
+      if (iconSrc && coinName && coinSymbol) {
+        // Actualizar la información de la criptomoneda
+        document.querySelector('.crypto-info').innerHTML = `
+          <img src="${decodeURIComponent(iconSrc)}" alt="${decodeURIComponent(coinName)} logo">
+          <h2 id="coin-name">${decodeURIComponent(coinName)} (${decodeURIComponent(coinSymbol)})</h2>
+        `;
+        
+        // Actualizar título de la página
+        document.title = `${decodeURIComponent(coinName)} (${decodeURIComponent(coinSymbol)}) - Historial | CryptoTracker`;
+      } else {
+        // Si faltan parámetros, usar el mapeo local como fallback
+        updateCryptoInfo(coinId);
+      }
       
       // Actualizar la imagen del gráfico con la criptomoneda seleccionada
-      const hours = document.getElementById('range').value;
+      const rangeSelect = document.getElementById('range');
+      const hours = rangeSelect.value;
       document.getElementById('chart-img').src = `http://localhost:8080/chart?coin=${coinId}&hours=${hours}`;
       
       // Configurar el event listener para el cambio de rango
-      const rangeSelect = document.getElementById('range');
       rangeSelect.addEventListener('change', () => {
-        const hours = rangeSelect.value;
-        document.getElementById('chart-img').src = `http://localhost:8080/chart?coin=${coinId}&hours=${hours}`;
+        const updatedHours = rangeSelect.value;
+        document.getElementById('chart-img').src = `http://localhost:8080/chart?coin=${coinId}&hours=${updatedHours}`;
+        
+        // También actualizar los datos históricos cuando cambia el rango
+        loadHistoricalData(coinId, updatedHours);
       });
       
-      // Cargar los datos históricos para la criptomoneda específica
+      // Cargar los datos históricos inicialmente
+      loadHistoricalData(coinId, hours);
+    });
+
+    // Función separada para cargar datos históricos
+    function loadHistoricalData(coinId, hours) {
       fetch(`http://localhost:8080/history?coin=${coinId}&hours=${hours}`)
         .then(res => {
           if (!res.ok) {
@@ -180,11 +203,11 @@
           // Crear una tabla para mostrar los datos históricos
           let tableHtml = `
             <h3>Historial de precios para ${coinId}</h3>
-            <table style="width:100%; margin-top:20px; border-collapse:collapse;">
+            <table>
               <thead>
-                <tr style="background-color:#1f1f1f;">
-                  <th style="padding:10px; text-align:left; border-bottom:1px solid #444;">Fecha/Hora</th>
-                  <th style="padding:10px; text-align:right; border-bottom:1px solid #444;">Precio (USD)</th>
+                <tr>
+                  <th>Fecha/Hora</th>
+                  <th style="text-align:right;">Precio (USD)</th>
                 </tr>
               </thead>
               <tbody>
@@ -193,11 +216,11 @@
           if (data.length === 0) {
             tableHtml += `
               <tr>
-                <td colspan="2" style="padding:10px; text-align:center;">No hay datos disponibles</td>
+                <td colspan="2" style="text-align:center;">No hay datos disponibles</td>
               </tr>
             `;
           } else {
-            data.forEach((point, index) => {
+            data.forEach((point) => {
               // Formatear la fecha
               const date = new Date(point.timestamp);
               const formattedDate = date.toLocaleString();
@@ -208,13 +231,10 @@
                 maximumFractionDigits: 2
               });
               
-              // Alternar colores de fila para mejor legibilidad
-              const rowColor = index % 2 === 0 ? '#1a1a1a' : '#222';
-              
               tableHtml += `
-                <tr style="background-color:${rowColor};">
-                  <td style="padding:10px; border-bottom:1px solid #333;">${formattedDate}</td>
-                  <td style="padding:10px; text-align:right; border-bottom:1px solid #333;">$${formattedPrice}</td>
+                <tr>
+                  <td>${formattedDate}</td>
+                  <td style="text-align:right;">$${formattedPrice}</td>
                 </tr>
               `;
             });
@@ -232,33 +252,74 @@
           document.getElementById('chart-container').innerHTML = 
             `<p style="color: red;">❌ No se pudieron cargar los datos históricos para ${coinId}. Error: ${error.message}</p>`;
         });
-    });
+    }
 
-    // Función para actualizar la información de la criptomoneda
+    // Función de respaldo para actualizar info de criptomoneda si faltan parámetros
     function updateCryptoInfo(coinId) {
-      // Mapeo de IDs a nombres y símbolos (puedes expandir esto según sea necesario)
+      // Mapeo de IDs a nombres, símbolos e íconos locales
       const cryptoInfo = {
-        'bitcoin': { name: 'Bitcoin', symbol: 'BTC', logo: 'https://cryptologos.cc/logos/bitcoin-btc-logo.png' },
-        'ethereum': { name: 'Ethereum', symbol: 'ETH', logo: 'https://cryptologos.cc/logos/ethereum-eth-logo.png' },
-        'dogecoin': { name: 'Dogecoin', symbol: 'DOGE', logo: 'https://cryptologos.cc/logos/dogecoin-doge-logo.png' },
-        'cardano': { name: 'Cardano', symbol: 'ADA', logo: 'https://cryptologos.cc/logos/cardano-ada-logo.png' },
-        'solana': { name: 'Solana', symbol: 'SOL', logo: 'https://cryptologos.cc/logos/solana-sol-logo.png' },
-        'ripple': { name: 'XRP', symbol: 'XRP', logo: 'https://cryptologos.cc/logos/xrp-xrp-logo.png' },
-        'chainlink': { name: 'Chainlink', symbol: 'LINK', logo: 'https://cryptologos.cc/logos/chainlink-link-logo.png' },
-        'bitcoin-cash': { name: 'Bitcoin Cash', symbol: 'BCH', logo: 'https://cryptologos.cc/logos/bitcoin-cash-bch-logo.png' },
-        'hyperliquid': { name: 'Hyperliquid', symbol: 'HYP', logo: 'https://via.placeholder.com/150' },
-        'tron': { name: 'Tron', symbol: 'TRX', logo: 'https://cryptologos.cc/logos/tron-trx-logo.png' }
+        'bitcoin': { 
+          name: 'Bitcoin', 
+          symbol: 'BTC', 
+          icon: 'assets/bitcoin-circle-svgrepo-com.svg' 
+        },
+        'ethereum': { 
+          name: 'Ethereum', 
+          symbol: 'ETH', 
+          icon: 'assets/ethereum-cryptocurrency-svgrepo-com.svg' 
+        },
+        'dogecoin': { 
+          name: 'Dogecoin', 
+          symbol: 'DOGE', 
+          icon: 'assets/doge-svgrepo-com.svg' 
+        },
+        'cardano': { 
+          name: 'Cardano', 
+          symbol: 'ADA', 
+          icon: 'assets/cardano-logo-svgrepo-com.svg' 
+        },
+        'solana': { 
+          name: 'Solana', 
+          symbol: 'SOL', 
+          icon: 'assets/solana-svgrepo-com.svg' 
+        },
+        'ripple': { 
+          name: 'XRP', 
+          symbol: 'XRP', 
+          icon: 'assets/xrp-svgrepo-com.svg' 
+        },
+        'chainlink': { 
+          name: 'Chainlink', 
+          symbol: 'LINK', 
+          icon: 'assets/chainlink-svgrepo-com.svg' 
+        },
+        'tron': { 
+          name: 'Tron', 
+          symbol: 'TRX', 
+          icon: 'assets/tron-crypto-svgrepo-com.svg' 
+        },
+        'hyperliquid': { 
+          name: 'Hyperliquid', 
+          symbol: 'HYP', 
+          icon: 'assets/hyperliquid.svg' 
+        }
       };
 
       // Obtener información para la moneda seleccionada o usar valores predeterminados
-      const info = cryptoInfo[coinId] || { name: coinId, symbol: coinId.toUpperCase(), logo: 'https://via.placeholder.com/150' };
+      const info = cryptoInfo[coinId] || { 
+        name: coinId.charAt(0).toUpperCase() + coinId.slice(1), 
+        symbol: coinId.toUpperCase(), 
+        icon: 'https://via.placeholder.com/150?text=' + coinId.charAt(0).toUpperCase() 
+      };
       
       // Actualizar la interfaz con la información de la criptomoneda
-      document.querySelector('.crypto-info img').src = info.logo;
-      document.getElementById('coin-name').textContent = `${info.name} (${info.symbol})`;
+      document.querySelector('.crypto-info').innerHTML = `
+        <img src="${info.icon}" alt="${info.name} logo">
+        <h2 id="coin-name">${info.name} (${info.symbol})</h2>
+      `;
       
-      // Actualizar el título del gráfico
-      document.querySelector('.chart img').alt = `Gráfico histórico de ${info.symbol}`;
+      // Actualizar el título de la página
+      document.title = `${info.name} (${info.symbol}) - Historial | CryptoTracker`;
     }
   </script>
 

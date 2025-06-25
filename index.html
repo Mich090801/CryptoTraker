@@ -254,52 +254,67 @@
       <!-- Datos reales se cargarán desde /prices -->
     </div>
   </div>
-<script>
-  fetch("http://localhost:8080/prices")
-    .then(res => {
-      if (!res.ok) {
-        throw new Error(`Error HTTP ${res.status}`);
-      }
-      return res.json();
-    })
-    .then(data => {
-      console.log("Datos de criptomonedas recibidos:", data); // Log para verificar los datos
-      const container = document.getElementById("crypto-cards");
-      container.innerHTML = "";
+  
+  <script>
+    fetch("http://localhost:8080/prices")
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`Error HTTP ${res.status}`);
+        }
+        return res.json();
+      })
+      .then(data => {
+        const container = document.getElementById("crypto-cards");
+        container.innerHTML = "";
 
-      if (data.length === 0) {
-        container.innerHTML = "<p>No se encontraron criptomonedas en la base de datos.</p>";
-        return;
-      }
+        if (data.length === 0) {
+          container.innerHTML = "<p>No se encontraron criptomonedas en la base de datos.</p>";
+          return;
+        }
 
-      data.forEach((coin, index) => {
-        // Asegúrate de que coin.id existe, de lo contrario usa un valor alternativo
-        const coinId = coin.id || coin.symbol || coin.name.toLowerCase().replace(' ', '-');
-        console.log(`Moneda ${index}: ${coin.name}, ID: ${coinId}`); // Log para verificar cada ID
-        
-        container.innerHTML += `
-          <div class="card" id="card-${index}" style="--coin-color: #3f51b5">
-            <img src="${coin.image}" alt="${coin.name} logo" />
-            <h2>${coin.name}</h2>
-            <p>$${coin.current_price}</p>
-            <p>${coin.last_updated}</p>
-            <button onclick="verHistorial('${coinId}')">Ver historial</button>
-          </div>`;
+        // Mapeo de IDs de criptomonedas a archivos SVG locales
+        const localIcons = {
+          'bitcoin': 'assets/bitcoin-circle-svgrepo-com.svg',
+          'ethereum': 'assets/ethereum-cryptocurrency-svgrepo-com.svg',
+          'cardano': 'assets/cardano-logo-svgrepo-com.svg',
+          'chainlink': 'assets/chainlink-svgrepo-com.svg',
+          'dogecoin': 'assets/doge-svgrepo-com.svg',
+          'solana': 'assets/solana-svgrepo-com.svg',
+          'tron': 'assets/tron-crypto-svgrepo-com.svg',
+          'ripple': 'assets/xrp-svgrepo-com.svg',
+          'hyperliquid': 'assets/hyperliquid.svg'
+        };
+
+        data.forEach((coin, index) => {
+          // Usar los iconos SVG locales si están disponibles
+          const iconSrc = localIcons[coin.id] || coin.image;
+          
+          container.innerHTML += `
+            <div class="card" id="card-${index}" style="--coin-color: #3f51b5">
+              <img src="${iconSrc}" alt="${coin.name} logo" />
+              <h2>${coin.name}</h2>
+              <p>$${coin.current_price}</p>
+              <p>${coin.last_updated}</p>
+              <button onclick="verHistorial('${coin.id}', '${iconSrc}', '${coin.name.replace("'", "\\'")}', '${coin.symbol}')">Ver historial</button>
+            </div>`;
+        });
+      })
+      .catch(error => {
+        console.error("Error al obtener datos:", error);
+        document.getElementById("crypto-cards").innerHTML = `
+          <p style="color: red;">❌ No se pudieron cargar los datos. Revisa que el servidor esté activo en <code>http://localhost:8080/prices</code></p>
+        `;
       });
-    })
-    .catch(error => {
-      console.error("Error al obtener datos:", error);
-      document.getElementById("crypto-cards").innerHTML = `
-        <p style="color: red;">❌ No se pudieron cargar los datos. Revisa que el servidor esté activo en <code>http://localhost:8080/prices</code></p>
-      `;
-    });
-    
-  // Función para redirigir al historial de una criptomoneda específica
-  function verHistorial(coinId) {
-    console.log(`Redirigiendo a historial de: ${coinId}`); // Log para verificar la redirección
-    window.location.href = `historial.html?coin=${coinId}`;
-  }
-</script>
-
+      
+    // Función para redirigir al historial de una criptomoneda específica
+    function verHistorial(coinId, iconSrc, name, symbol) {
+      // Codificar los parámetros para URL
+      const encodedIcon = encodeURIComponent(iconSrc);
+      const encodedName = encodeURIComponent(name);
+      const encodedSymbol = encodeURIComponent(symbol);
+      
+      window.location.href = `historial.html?coin=${coinId}&icon=${encodedIcon}&name=${encodedName}&symbol=${encodedSymbol}`;
+    }
+  </script>
 </body>
 </html>
