@@ -284,18 +284,34 @@
           'ripple': 'assets/xrp-svgrepo-com.svg',
           'hyperliquid': 'assets/hyperliquid.svg'
         };
+        
+        // Mapeo de IDs de criptomonedas a colores personalizados
+        const coinColors = {
+          'bitcoin': '#f7931a',       // Naranja de Bitcoin
+          'ethereum': '#627eea',      // Azul de Ethereum
+          'cardano': '#0033ad',       // Azul de Cardano
+          'chainlink': '#2a5ada',     // Azul de Chainlink
+          'dogecoin': '#c3a634',      // Dorado de Dogecoin
+          'solana': '#00ffbd',        // Verde-azulado de Solana
+          'tron': '#ff0013',          // Rojo de Tron
+          'ripple': '#23292f',        // Gris oscuro de XRP
+          'hyperliquid': '#9c27b0'    // Púrpura para Hyperliquid
+        };
 
         data.forEach((coin, index) => {
           // Usar los iconos SVG locales si están disponibles
           const iconSrc = localIcons[coin.id] || coin.image;
           
+          // Asignar un color personalizado para cada criptomoneda, o usar el color por defecto
+          const coinColor = coinColors[coin.id] || '#3f51b5';
+          
           container.innerHTML += `
-            <div class="card" id="card-${index}" style="--coin-color: #3f51b5">
+            <div class="card" id="card-${index}" style="--coin-color: ${coinColor}">
               <img src="${iconSrc}" alt="${coin.name} logo" />
               <h2>${coin.name}</h2>
               <p>$${coin.current_price}</p>
               <p>${coin.last_updated}</p>
-              <button onclick="verHistorial('${coin.id}', '${iconSrc}', '${coin.name.replace("'", "\\'")}', '${coin.symbol}')">Ver historial</button>
+              <button onclick="verHistorial('${coin.id}', '${iconSrc}', '${coin.name.replace("'", "\\'")}', '${coin.symbol}', '${coinColor}')">Ver historial</button>
             </div>`;
         });
       })
@@ -307,13 +323,13 @@
       });
       
     // Función para redirigir al historial de una criptomoneda específica
-    function verHistorial(coinId, iconSrc, name, symbol) {
+    function verHistorial(coinId, iconSrc, name, symbol, coinColor) {
       // Codificar los parámetros para URL
       const encodedIcon = encodeURIComponent(iconSrc);
       const encodedName = encodeURIComponent(name);
       const encodedSymbol = encodeURIComponent(symbol);
       
-      window.location.href = `historial.html?coin=${coinId}&icon=${encodedIcon}&name=${encodedName}&symbol=${encodedSymbol}`;
+      window.location.href = `historial.html?coin=${coinId}&icon=${encodedIcon}&name=${encodedName}&symbol=${encodedSymbol}&color=${encodeURIComponent(coinColor)}`;
     }
   </script>
 </body>
