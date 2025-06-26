@@ -118,6 +118,14 @@
       margin-bottom: 2rem;
     }
 
+    .section-divider {
+      margin: 20px auto 35px;
+      position: relative;
+      height: 5px;
+      max-width: 300px;
+      background: linear-gradient(to right, transparent, rgba(63, 81, 181, 0.5), transparent);
+    }
+
     .cards {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -229,6 +237,116 @@
     .card:hover button::before {
       left: 100%;
     }
+
+    /* Eliminar el carrusel horizontal */
+    .crypto-background {
+      display: none; /* Eliminamos el carrusel horizontal existente */
+    }
+
+    /* Estilos para los carriles verticales en ambos lados */
+    .crypto-rail-left, .crypto-rail-right {
+      position: fixed;
+      width: 60px;
+      top: 0;
+      bottom: 0;
+      overflow: hidden;
+      background: linear-gradient(to bottom, #1a1a1a, #1e1e1e, #1a1a1a);
+      z-index: -1;
+    }
+
+    .crypto-rail-left {
+      left: 0;
+      border-right: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .crypto-rail-right {
+      right: 0;
+      border-left: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .crypto-column {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+      padding: 15px 0;
+      width: 100%;
+    }
+
+    .left-column {
+      animation: scrollIconsDown 35s linear infinite;
+    }
+
+    .right-column {
+      animation: scrollIconsUp 35s linear infinite;
+    }
+
+    .crypto-icon {
+      display: flex;
+      justify-content: center;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+
+    .crypto-icon:hover {
+      opacity: 1;
+      transform: scale(1.2);
+      filter: drop-shadow(0 0 10px var(--icon-color, rgba(255, 255, 255, 0.4)));
+    }
+
+    .crypto-icon img {
+      width: 32px;
+      height: 32px;
+      filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.2));
+    }
+
+    /* Animaciones para el desplazamiento vertical */
+    @keyframes scrollIconsDown {
+      0% {
+        transform: translateY(-50%);
+      }
+      100% {
+        transform: translateY(100%);
+      }
+    }
+
+    @keyframes scrollIconsUp {
+      0% {
+        transform: translateY(100%);
+      }
+      100% {
+        transform: translateY(-50%);
+      }
+    }
+
+    /* Ajustar el contenedor principal para que no se solape con los carriles */
+    .container {
+      max-width: calc(100% - 120px);
+      margin: 0 auto;
+      padding: 2rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Ajuste para pantallas pequeñas */
+    @media (max-width: 768px) {
+      .crypto-rail-left, .crypto-rail-right {
+        width: 40px;
+      }
+      .container {
+        max-width: calc(100% - 80px);
+      }
+    }
+
+    /* Desactivar en pantallas muy pequeñas */
+    @media (max-width: 600px) {
+      .crypto-rail-left, .crypto-rail-right {
+        display: none;
+      }
+      .container {
+        max-width: 100%;
+      }
+    }
   </style>
 </head>
 <body>
@@ -247,14 +365,35 @@
     </div>
   </header>
 
+  <!-- Eliminar el carrusel horizontal -->
+  <!-- <div class="crypto-background">
+    <div class="crypto-carousel" id="crypto-carousel">
+    </div>
+  </div> -->
+
+  <!-- Añadir carriles verticales a ambos lados -->
+  <div class="crypto-rail-left">
+    <div class="crypto-column left-column" id="left-column">
+      <!-- Los iconos se añadirán dinámicamente con JavaScript -->
+    </div>
+  </div>
+  
+  <div class="crypto-rail-right">
+    <div class="crypto-column right-column" id="right-column">
+      <!-- Los iconos se añadirán dinámicamente con JavaScript -->
+    </div>
+  </div>
+
   <div class="container">
     <div class="title">Precios actuales de criptomonedas</div>
+    <div class="section-divider"></div>
     <div class="cards" id="crypto-cards">
       <!-- Datos reales se cargarán desde /prices -->
     </div>
   </div>
   
   <script>
+    // Modificar la función fetch para utilizar los íconos de la API en las tarjetas
     fetch("http://localhost:8080/prices")
       .then(res => {
         if (!res.ok) {
@@ -271,19 +410,6 @@
           return;
         }
 
-        // Mapeo de IDs de criptomonedas a archivos SVG locales
-        const localIcons = {
-          'bitcoin': 'assets/bitcoin-circle-svgrepo-com.svg',
-          'ethereum': 'assets/ethereum-cryptocurrency-svgrepo-com.svg',
-          'cardano': 'assets/cardano-logo-svgrepo-com.svg',
-          'chainlink': 'assets/chainlink-svgrepo-com.svg',
-          'dogecoin': 'assets/doge-svgrepo-com.svg',
-          'solana': 'assets/solana-svgrepo-com.svg',
-          'tron': 'assets/tron-crypto-svgrepo-com.svg',
-          'ripple': 'assets/xrp-svgrepo-com.svg',
-          'hyperliquid': 'assets/hyperliquid.svg'
-        };
-        
         // Mapeo de IDs de criptomonedas a colores personalizados
         const coinColors = {
           'bitcoin': '#f7931a',       // Naranja de Bitcoin
@@ -297,9 +423,12 @@
           'hyperliquid': '#9c27b0'    // Púrpura para Hyperliquid
         };
 
+        // Usar esta información para crear también los carriles laterales con íconos de API reales
+        updateSideRails(data);
+
         data.forEach((coin, index) => {
-          // Usar los iconos SVG locales si están disponibles
-          const iconSrc = localIcons[coin.id] || coin.image;
+          // Usar directamente la imagen de la API
+          const iconSrc = coin.image;
           
           // Asignar un color personalizado para cada criptomoneda, o usar el color por defecto
           const coinColor = coinColors[coin.id] || '#3f51b5';
@@ -330,6 +459,245 @@
       
       window.location.href = `historial.html?coin=${coinId}&icon=${encodedIcon}&name=${encodedName}&symbol=${encodedSymbol}&color=${encodeURIComponent(coinColor)}`;
     }
+
+    // Nueva función para actualizar los carriles laterales con datos de la API
+    function updateSideRails(cryptoData) {
+      const leftColumn = document.getElementById('left-column');
+      const rightColumn = document.getElementById('right-column');
+      
+      // Verificar y crear los elementos si no existen
+      if (!leftColumn || !rightColumn) return;
+      
+      // Limpiar columnas existentes
+      leftColumn.innerHTML = '';
+      rightColumn.innerHTML = '';
+      
+      // Mapear los datos para el formato que necesitamos
+      const cryptoIcons = cryptoData.map(coin => ({
+        src: coin.image,
+        name: coin.name,
+        color: getColorForCoin(coin.id),
+        id: coin.id
+      }));
+      
+      // Crear los íconos para ambas columnas
+      const createColumnIcons = (column, isReversed = false) => {
+        // Si es la columna derecha, invertimos el orden para variedad visual
+        const iconsToUse = isReversed ? [...cryptoIcons].reverse() : cryptoIcons;
+        
+        iconsToUse.forEach(icon => {
+          const iconElement = document.createElement('div');
+          iconElement.className = 'crypto-icon';
+          iconElement.style.setProperty('--icon-color', icon.color);
+          iconElement.setAttribute('data-coin-id', icon.id);
+          iconElement.innerHTML = `<img src="${icon.src}" alt="${icon.name}" title="${icon.name}">`;
+          
+          // Añadir evento de clic para navegar al historial de la moneda
+          iconElement.addEventListener('click', () => {
+            verHistorial(icon.id, icon.src, icon.name, icon.id.toUpperCase(), icon.color);
+          });
+          
+          column.appendChild(iconElement);
+        });
+      };
+      
+      // Crear íconos para ambas columnas
+      createColumnIcons(leftColumn);
+      createColumnIcons(rightColumn, true);
+      
+      // Duplicar los íconos varias veces para asegurar que llenan todo el carril
+      const duplicateIcons = (column, count = 3) => {
+        const originalIcons = Array.from(column.querySelectorAll('.crypto-icon'));
+        for (let i = 0; i < count; i++) {
+          originalIcons.forEach(icon => {
+            const clone = icon.cloneNode(true);
+            
+            // Recuperar el ID de la moneda y añadir el evento de clic al clon
+            const coinId = icon.getAttribute('data-coin-id');
+            const coinData = cryptoIcons.find(c => c.id === coinId);
+            if (coinData) {
+              clone.addEventListener('click', () => {
+                verHistorial(coinData.id, coinData.src, coinData.name, coinData.id.toUpperCase(), coinData.color);
+              });
+            }
+            
+            column.appendChild(clone);
+          });
+        }
+      };
+      
+      // Duplicar íconos en ambas columnas
+      duplicateIcons(leftColumn);
+      duplicateIcons(rightColumn);
+      
+      // Ajustar las animaciones
+      adjustRailAnimations();
+    }
+
+    // Función para obtener el color correspondiente a una criptomoneda
+    function getColorForCoin(coinId) {
+      const coinColors = {
+        'bitcoin': '#f7931a',
+        'ethereum': '#627eea',
+        'cardano': '#0033ad',
+        'chainlink': '#2a5ada',
+        'dogecoin': '#c3a634',
+        'solana': '#00ffbd',
+        'tron': '#ff0013',
+        'ripple': '#23292f',
+        'hyperliquid': '#9c27b0'
+      };
+      return coinColors[coinId] || '#3f51b5';
+    }
+
+    // Función para ajustar las animaciones de los carriles
+    function adjustRailAnimations() {
+      const leftColumn = document.getElementById('left-column');
+      const rightColumn = document.getElementById('right-column');
+      
+      if (!leftColumn || !rightColumn) return;
+      
+      const windowHeight = window.innerHeight;
+      const leftColumnHeight = leftColumn.scrollHeight;
+      const rightColumnHeight = rightColumn.scrollHeight;
+      
+      // Crear keyframes personalizados para ambas columnas
+      const leftKeyframes = `
+        @keyframes scrollIconsDown {
+          0% {
+            transform: translateY(-${leftColumnHeight/2}px);
+          }
+          100% {
+            transform: translateY(${windowHeight}px);
+          }
+        }
+      `;
+      
+      const rightKeyframes = `
+        @keyframes scrollIconsUp {
+          0% {
+            transform: translateY(${windowHeight}px);
+          }
+          100% {
+            transform: translateY(-${rightColumnHeight/2}px);
+          }
+        }
+      `;
+      
+      // Crear o actualizar las hojas de estilos para las animaciones
+      let leftStyleSheet = document.getElementById('left-animation');
+      if (!leftStyleSheet) {
+        leftStyleSheet = document.createElement('style');
+        leftStyleSheet.id = 'left-animation';
+        document.head.appendChild(leftStyleSheet);
+      }
+      leftStyleSheet.textContent = leftKeyframes;
+      
+      let rightStyleSheet = document.getElementById('right-animation');
+      if (!rightStyleSheet) {
+        rightStyleSheet = document.createElement('style');
+        rightStyleSheet.id = 'right-animation';
+        document.head.appendChild(rightStyleSheet);
+      }
+      rightStyleSheet.textContent = rightKeyframes;
+      
+      // Reiniciar las animaciones para que tomen los nuevos valores
+      leftColumn.style.animation = 'none';
+      rightColumn.style.animation = 'none';
+      
+      // Forzar reflow
+      void leftColumn.offsetWidth;
+      void rightColumn.offsetWidth;
+      
+      // Restaurar animaciones
+      leftColumn.style.animation = 'scrollIconsDown 35s linear infinite';
+      rightColumn.style.animation = 'scrollIconsUp 35s linear infinite';
+    }
+    
+    // Función debounce para evitar múltiples llamadas rápidas
+    function debounce(func, wait) {
+      let timeout;
+      return function() {
+        const context = this;
+        const args = arguments;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), wait);
+      };
+    }
+    
+    // Evento para inicializar los carriles
+    document.addEventListener('DOMContentLoaded', function() {
+      const leftColumn = document.getElementById('left-column');
+      const rightColumn = document.getElementById('right-column');
+      
+      if (leftColumn && rightColumn) {
+        // Añadir interactividad a los íconos
+        const handleMouseOver = (e) => {
+          if (e.target.closest('.crypto-icon')) {
+            e.target.closest('.crypto-column').style.animationPlayState = 'paused';
+          }
+        };
+        
+        const handleMouseOut = (e) => {
+          e.target.closest('.crypto-column').style.animationPlayState = 'running';
+        };
+        
+        leftColumn.addEventListener('mouseover', handleMouseOver);
+        leftColumn.addEventListener('mouseout', handleMouseOut);
+        rightColumn.addEventListener('mouseover', handleMouseOver);
+        rightColumn.addEventListener('mouseout', handleMouseOut);
+        
+        // Cargar iconos iniciales mientras esperamos los datos de la API
+        const initialIcons = [
+          { src: 'assets/bitcoin-circle-svgrepo-com.svg', name: 'Bitcoin', color: '#f7931a', id: 'bitcoin' },
+          { src: 'assets/ethereum-cryptocurrency-svgrepo-com.svg', name: 'Ethereum', color: '#627eea', id: 'ethereum' },
+          { src: 'assets/cardano-logo-svgrepo-com.svg', name: 'Cardano', color: '#0033ad', id: 'cardano' },
+          { src: 'assets/chainlink-svgrepo-com.svg', name: 'Chainlink', color: '#2a5ada', id: 'chainlink' },
+          { src: 'assets/doge-svgrepo-com.svg', name: 'Dogecoin', color: '#c3a634', id: 'dogecoin' },
+          { src: 'assets/solana-svgrepo-com.svg', name: 'Solana', color: '#00ffbd', id: 'solana' },
+          { src: 'assets/tron-crypto-svgrepo-com.svg', name: 'Tron', color: '#ff0013', id: 'tron' },
+          { src: 'assets/xrp-svgrepo-com.svg', name: 'XRP', color: '#23292f', id: 'ripple' },
+          { src: 'assets/hyperliquid.svg', name: 'Hyperliquid', color: '#9c27b0', id: 'hyperliquid' }
+        ];
+        
+        // Crear inicializador temporal mientras se cargan los datos reales
+        const initTempRails = () => {
+          leftColumn.innerHTML = '';
+          rightColumn.innerHTML = '';
+          
+          initialIcons.forEach(icon => {
+            const iconElement = document.createElement('div');
+            iconElement.className = 'crypto-icon';
+            iconElement.style.setProperty('--icon-color', icon.color);
+            iconElement.innerHTML = `<img src="${icon.src}" alt="${icon.name}" title="${icon.name}">`;
+            leftColumn.appendChild(iconElement.cloneNode(true));
+            
+            const iconElementRight = iconElement.cloneNode(true);
+            rightColumn.appendChild(iconElementRight);
+          });
+          
+          // Duplicar íconos
+          const leftIcons = Array.from(leftColumn.querySelectorAll('.crypto-icon'));
+          const rightIcons = Array.from(rightColumn.querySelectorAll('.crypto-icon'));
+          
+          for (let i = 0; i < 3; i++) {
+            leftIcons.forEach(icon => leftColumn.appendChild(icon.cloneNode(true)));
+            rightIcons.forEach(icon => rightColumn.appendChild(icon.cloneNode(true)));
+          }
+          
+          // Iniciar animaciones
+          adjustRailAnimations();
+        };
+        
+        // Cargar íconos temporales
+        initTempRails();
+      }
+      
+      // Ajustar las animaciones cuando cambia el tamaño de la ventana
+      window.addEventListener('resize', debounce(() => {
+        adjustRailAnimations();
+      }, 250));
+    });
   </script>
 </body>
 </html>
