@@ -282,6 +282,95 @@
       font-size: 0.9rem;
       margin-top: 1rem;
     }
+
+    /* Añade estos estilos para el estado vacío */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 1rem;
+      min-height: 300px;
+      text-align: center;
+      background-color: rgba(30, 30, 30, 0.7);
+      border-radius: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .empty-state-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      color: #555;
+    }
+
+    .empty-state h3 {
+      margin: 0.5rem 0;
+      font-size: 1.5rem;
+      color: #ccc;
+    }
+
+    .empty-state p {
+      color: #888;
+      max-width: 80%;
+      margin: 0.5rem auto;
+    }
+
+    .pulse-animation {
+      animation: pulse 2s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.5; transform: scale(0.95); }
+      50% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0.5; transform: scale(0.95); }
+    }
+
+    .steps {
+      display: flex;
+      justify-content: center;
+      margin-top: 1.5rem;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: #252525;
+      padding: 1rem;
+      border-radius: 10px;
+      width: 120px;
+      position: relative;
+    }
+
+    .step-number {
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      background-color: #3f51b5;
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+
+    .step-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: #ccc;
+    }
+
+    .step-text {
+      font-size: 0.8rem;
+      text-align: center;
+      color: #aaa;
+    }
   </style>
 </head>
 <body>
@@ -327,8 +416,30 @@
       <button id="compare-btn">Generar gráfico de comparación</button>
     </div>
 
-    <div class="chart">
-      <img id="chart-img" src="https://via.placeholder.com/800x400?text=Selecciona+criptos+e+intervalo" alt="Gráfico de comparación">
+    <div class="chart" id="chart-container">
+      <div class="empty-state" id="empty-state">
+        <div class="empty-state-icon pulse-animation">📊</div>
+        <h3>Sin datos para visualizar</h3>
+        <p>Selecciona al menos una criptomoneda y un intervalo de tiempo para ver la comparación gráfica</p>
+        <div class="steps">
+          <div class="step">
+            <div class="step-number">1</div>
+            <div class="step-icon">☑️</div>
+            <div class="step-text">Selecciona monedas</div>
+          </div>
+          <div class="step">
+            <div class="step-number">2</div>
+            <div class="step-icon">⏱️</div>
+            <div class="step-text">Elige intervalo</div>
+          </div>
+          <div class="step">
+            <div class="step-number">3</div>
+            <div class="step-icon">🔄</div>
+            <div class="step-text">Genera gráfico</div>
+          </div>
+        </div>
+      </div>
+      <!-- La imagen se generará dinámicamente cuando sea necesaria -->
     </div>
   </div>
 
@@ -418,7 +529,45 @@
 
       const coins = selected.join(',');
       const url = `http://localhost:8080/compare?coins=${coins}&hours=${hours}`;
-      document.getElementById('chart-img').src = url;
+      
+      // Acceder al contenedor de la gráfica
+      const chartContainer = document.getElementById('chart-container');
+      
+      // Mostrar un indicador de carga mientras se genera el gráfico
+      chartContainer.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon pulse-animation">⏳</div>
+          <h3>Generando gráfico...</h3>
+          <p>Obteniendo datos de ${selected.length} criptomoneda${selected.length !== 1 ? 's' : ''}</p>
+        </div>
+      `;
+
+      // Crear una nueva imagen
+      const img = new Image();
+      img.id = 'chart-img';
+      img.alt = 'Gráfico de comparación';
+      
+      // Configurar eventos para la carga de la imagen
+      img.onload = function() {
+        // Cuando la imagen se cargue, reemplazar el estado de carga con la imagen
+        chartContainer.innerHTML = '';
+        chartContainer.appendChild(img);
+      };
+      
+      img.onerror = function() {
+        // Si hay un error al cargar la imagen, mostrar un mensaje de error
+        chartContainer.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">❌</div>
+            <h3>Error al cargar el gráfico</h3>
+            <p>No se pudieron obtener los datos. Por favor verifica que el servidor esté funcionando.</p>
+            <button onclick="generateChart()" style="margin-top: 1rem;">Intentar de nuevo</button>
+          </div>
+        `;
+      };
+      
+      // Establecer la URL de la imagen
+      img.src = url;
 
       // Cambiar el color del borde de la gráfica según las monedas seleccionadas
       if (selected.length === 1) {
