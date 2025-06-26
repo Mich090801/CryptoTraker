@@ -123,6 +123,92 @@
       text-align: center;
     }
 
+    .crypto-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 12px;
+      margin: 1rem auto;
+      max-width: 800px;
+    }
+
+    .crypto-checkbox {
+      position: relative;
+      border-radius: 10px;
+      background-color: #1e1e1e;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .crypto-checkbox:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .crypto-checkbox input[type="checkbox"] {
+      position: absolute;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .crypto-checkbox label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+      box-sizing: border-box;
+    }
+
+    .crypto-checkbox img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-bottom: 0.5rem;
+      transition: transform 0.3s ease;
+      object-fit: contain;
+      filter: grayscale(70%);
+    }
+
+    .crypto-checkbox span {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #aaa;
+      transition: color 0.3s ease;
+    }
+
+    /* Estilo para checkbox seleccionado */
+    .crypto-checkbox input[type="checkbox"]:checked ~ label {
+      background-color: rgba(63, 81, 181, 0.2);
+    }
+
+    .crypto-checkbox input[type="checkbox"]:checked ~ label img {
+      transform: scale(1.1);
+      filter: grayscale(0%);
+    }
+
+    .crypto-checkbox input[type="checkbox"]:checked ~ label span {
+      color: #fff;
+    }
+
+    .crypto-checkbox::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 3px;
+      height: 0;
+      transition: height 0.3s ease;
+    }
+
+    .crypto-checkbox input[type="checkbox"]:checked ~ .crypto-checkbox::before {
+      height: 100%;
+    }
+
     select, button {
       background-color: #1f1f1f;
       color: #fff;
@@ -182,8 +268,19 @@
       color: #ccc;
     }
 
-    #crypto-select {
-      min-width: 300px;
+    #range-container {
+      max-width: 300px;
+      margin: 0 auto;
+    }
+
+    .selected-count {
+      display: inline-block;
+      background-color: #3f51b5;
+      color: white;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      margin-top: 1rem;
     }
   </style>
 </head>
@@ -207,22 +304,15 @@
     <h2>Comparar Variación de Criptomonedas</h2>
 
     <div class="form-section">
-      <label for="crypto-select">Selecciona criptomonedas:</label>
-      <select id="crypto-select" multiple size="6">
-        <option value="bitcoin">Bitcoin (BTC)</option>
-        <option value="ethereum">Ethereum (ETH)</option>
-        <option value="cardano">Cardano (ADA)</option>
-        <option value="solana">Solana (SOL)</option>
-        <option value="dogecoin">Dogecoin (DOGE)</option>
-        <option value="ripple">XRP</option>
-        <option value="hyperliquid">Hyperliquid</option>
-        <option value="bitcoin-cash">Bitcoin Cash</option>
-        <option value="chainlink">Chainlink</option>
-        <option value="tron">Tron (TRX)</option>
-      </select>
+      <label>Selecciona las criptomonedas a comparar:</label>
+      <div id="selected-count" class="selected-count">0 monedas seleccionadas</div>
+      
+      <div class="crypto-grid" id="crypto-grid">
+        <!-- Los checkboxes se crearán dinámicamente con JavaScript -->
+      </div>
     </div>
 
-    <div class="form-section">
+    <div class="form-section" id="range-container">
       <label for="range">Intervalo en horas:</label>
       <select id="range">
         <option value="1">1 hora</option>
@@ -234,7 +324,7 @@
     </div>
 
     <div class="form-section">
-      <button onclick="generateChart()">Generar gráfico</button>
+      <button id="compare-btn">Generar gráfico de comparación</button>
     </div>
 
     <div class="chart">
@@ -246,11 +336,81 @@
     document.addEventListener('DOMContentLoaded', () => {
       // Aplicar colores temáticos
       applyThemeColor('#3f51b5');
+      
+      // Datos de las criptomonedas
+      const cryptos = [
+        { id: 'bitcoin', name: 'Bitcoin', symbol: 'BTC', color: '#f7931a', icon: 'assets/bitcoin-circle-svgrepo-com.svg' },
+        { id: 'ethereum', name: 'Ethereum', symbol: 'ETH', color: '#627eea', icon: 'assets/ethereum-cryptocurrency-svgrepo-com.svg' },
+        { id: 'cardano', name: 'Cardano', symbol: 'ADA', color: '#0033ad', icon: 'assets/cardano-logo-svgrepo-com.svg' },
+        { id: 'solana', name: 'Solana', symbol: 'SOL', color: '#00ffbd', icon: 'assets/solana-svgrepo-com.svg' },
+        { id: 'dogecoin', name: 'Dogecoin', symbol: 'DOGE', color: '#c3a634', icon: 'assets/doge-svgrepo-com.svg' },
+        { id: 'ripple', name: 'XRP', symbol: 'XRP', color: '#23292f', icon: 'assets/xrp-svgrepo-com.svg' },
+        { id: 'chainlink', name: 'Chainlink', symbol: 'LINK', color: '#2a5ada', icon: 'assets/chainlink-svgrepo-com.svg' },
+        { id: 'tron', name: 'Tron', symbol: 'TRX', color: '#ff0013', icon: 'assets/tron-crypto-svgrepo-com.svg' },
+        { id: 'hyperliquid', name: 'Hyperliquid', symbol: 'HYP', color: '#9c27b0', icon: 'assets/hyperliquid.svg' }
+      ];
+      
+      // Generar los checkboxes dinámicamente
+      const cryptoGrid = document.getElementById('crypto-grid');
+      
+      cryptos.forEach(crypto => {
+        const checkboxContainer = document.createElement('div');
+        checkboxContainer.className = 'crypto-checkbox';
+        checkboxContainer.style.setProperty('--coin-color', crypto.color);
+        
+        // Crear el checkbox con la estructura necesaria
+        checkboxContainer.innerHTML = `
+          <input type="checkbox" id="crypto-${crypto.id}" value="${crypto.id}" />
+          <label for="crypto-${crypto.id}">
+            <img src="${crypto.icon}" alt="${crypto.name} logo" />
+            <span>${crypto.name} (${crypto.symbol})</span>
+          </label>
+        `;
+        
+        // Estilo personalizado para el borde según color de la criptomoneda
+        const style = document.createElement('style');
+        style.textContent = `
+          #crypto-${crypto.id}:checked ~ label {
+            background-color: ${crypto.color}20;
+          }
+          .crypto-checkbox:has(#crypto-${crypto.id}:checked) {
+            border-left: 3px solid ${crypto.color};
+          }
+        `;
+        document.head.appendChild(style);
+        
+        // Agregar evento de cambio para actualizar el contador
+        const checkbox = checkboxContainer.querySelector('input');
+        checkbox.addEventListener('change', updateSelectedCount);
+        
+        cryptoGrid.appendChild(checkboxContainer);
+      });
+      
+      // Función para actualizar contador de seleccionados
+      function updateSelectedCount() {
+        const selectedCheckboxes = document.querySelectorAll('.crypto-checkbox input[type="checkbox"]:checked');
+        const count = selectedCheckboxes.length;
+        document.getElementById('selected-count').textContent = `${count} moneda${count !== 1 ? 's' : ''} seleccionada${count !== 1 ? 's' : ''}`;
+        
+        // Actualizar color del contador según las monedas seleccionadas
+        if (count === 1) {
+          const selectedCryptoId = selectedCheckboxes[0].value;
+          const selectedCrypto = cryptos.find(c => c.id === selectedCryptoId);
+          document.getElementById('selected-count').style.backgroundColor = selectedCrypto.color;
+        } else {
+          document.getElementById('selected-count').style.backgroundColor = '#3f51b5';
+        }
+      }
+      
+      // Configurar el botón de comparación
+      document.getElementById('compare-btn').addEventListener('click', generateChart);
     });
 
     function generateChart() {
-      const selected = Array.from(document.getElementById('crypto-select').selectedOptions).map(o => o.value);
+      const selectedCheckboxes = document.querySelectorAll('.crypto-checkbox input[type="checkbox"]:checked');
+      const selected = Array.from(selectedCheckboxes).map(cb => cb.value);
       const hours = document.getElementById('range').value;
+      
       if (selected.length === 0) {
         alert('Selecciona al menos una criptomoneda.');
         return;
