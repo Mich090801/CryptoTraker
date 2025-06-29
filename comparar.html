@@ -268,7 +268,13 @@
       color: #ccc;
     }
 
-    /* Estilo mejorado para el input numérico */
+    /* Control numérico de horas */
+    .hours-container {
+      position: relative;
+      width: fit-content;
+      margin: 0 auto;
+    }
+
     .number-input-container {
       display: flex;
       align-items: stretch;
@@ -278,7 +284,7 @@
       overflow: hidden;
       width: 140px;
       height: 42px;
-      margin: 0.5rem auto;
+      margin-right: 1rem;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
       transition: all 0.2s ease;
     }
@@ -316,7 +322,7 @@
       flex-direction: column;
       border-left: 1px solid #333;
       width: 28px;
-      flex-shrink: 0; /* Evitar que se encoja */
+      flex-shrink: 0;
     }
     
     .number-control-btn {
@@ -329,9 +335,6 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.2s ease;
-      position: relative; /* Para posicionar los íconos */
-      line-height: 1; /* Normalizar la altura de línea */
     }
     
     .number-control-btn:hover {
@@ -342,14 +345,8 @@
     .number-control-btn:first-child {
       border-bottom: 1px solid #333;
     }
-
-    /* Eliminar cualquier definición previa de flechas que cause duplicación */
-    .arrow-up::after,
-    .arrow-down::after {
-      content: none;
-    }
-
-    /* Estilo refinado para las flechas */
+    
+    /* Nuevos estilos para las flechas usando triángulos CSS para más precisión */
     .arrow-up::before {
       content: '';
       display: block;
@@ -369,6 +366,12 @@
       border-right: 4px solid transparent;
       border-top: 4px solid currentColor;
     }
+    
+    /* Eliminar todos los demás estilos de flecha para evitar conflictos */
+    .arrow-up::after,
+    .arrow-down::after {
+      content: none;
+    }
 
     /* Etiqueta para horas */
     .hours-label {
@@ -380,11 +383,16 @@
       transform: translateX(-50%);
       white-space: nowrap;
     }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 1rem 0;
+    }
     
-    #range-container {
+    .hours-container {
       position: relative;
-      max-width: 300px;
-      margin: 0 auto 1.5rem;
     }
 
     .loading {
@@ -510,6 +518,21 @@
         transform: scale(0.95);
       }
     }
+
+    .hours-container {
+      position: relative;
+      margin: 0 auto;
+      width: fit-content;
+    }
+    
+    /* Asegurar que los botones tengan un solo evento de clic */
+    .number-control-btn {
+      pointer-events: none;
+    }
+    
+    .number-control-btn::before {
+      pointer-events: auto;
+    }
   </style>
 </head>
 <body>
@@ -542,22 +565,26 @@
 
     <div class="form-section" id="range-container">
       <label for="hours-input">Intervalo</label>
-      <div class="number-input-container">
-        <input 
-          type="number" 
-          id="hours-input" 
-          min="1" 
-          max="168" 
-          value="24" 
-          class="number-input"
-          title="Selecciona entre 1 y 168 horas"
-        >
-        <div class="number-controls">
-          <button type="button" class="number-control-btn arrow-up" onclick="incrementHours(1)"></button>
-          <button type="button" class="number-control-btn arrow-down" onclick="incrementHours(-1)"></button>
+      <div class="controls">
+        <div class="hours-container">
+          <div class="number-input-container">
+            <input 
+              type="number" 
+              id="hours-input" 
+              min="1" 
+              max="168" 
+              value="24" 
+              class="number-input"
+              title="Selecciona entre 1 y 168 horas"
+            >
+            <div class="number-controls">
+              <button type="button" class="number-control-btn arrow-up" onclick="incrementHours(1)"></button>
+              <button type="button" class="number-control-btn arrow-down" onclick="incrementHours(-1)"></button>
+            </div>
+          </div>
+          <span class="hours-label">horas</span>
         </div>
       </div>
-      <span class="hours-label">horas</span>
     </div>
 
     <div class="form-section">
@@ -592,9 +619,43 @@
   </div>
 
   <script>
+    // Reemplazar la función incrementHours con la versión exacta que funciona en historial.html
+    function incrementHours(step) {
+      const input = document.getElementById('hours-input');
+      const currentValue = parseInt(input.value) || 24;
+      // Asegurar que step sea un número y convertirlo si es necesario
+      const stepValue = parseInt(step) || 0;
+      const newValue = Math.max(1, Math.min(168, currentValue + stepValue));
+      input.value = newValue;
+    }
+    
     document.addEventListener('DOMContentLoaded', () => {
       // Aplicar colores temáticos
       applyThemeColor('#3f51b5');
+      
+      // CORRECCIÓN: eliminar este bloque que está causando la duplicación de eventos
+      /*
+      const upButton = document.querySelector('.arrow-up');
+      const downButton = document.querySelector('.arrow-down');
+      
+      if (upButton && downButton) {
+        // Eliminar eventos anteriores usando clonación
+        const upButtonClone = upButton.cloneNode(true);
+        const downButtonClone = downButton.cloneNode(true);
+        
+        upButton.parentNode.replaceChild(upButtonClone, upButton);
+        downButton.parentNode.replaceChild(downButtonClone, downButton);
+        
+        // Añadir nuevos event listeners
+        document.querySelector('.arrow-up').addEventListener('click', function() {
+          incrementHours(1);
+        });
+        
+        document.querySelector('.arrow-down').addEventListener('click', function() {
+          incrementHours(-1);
+        });
+      }
+      */
       
       // Datos de las criptomonedas
       const cryptos = [
@@ -664,14 +725,6 @@
       // Configurar el botón de comparación
       document.getElementById('compare-btn').addEventListener('click', generateChart);
     });
-
-    // Añadir esta función para incrementar/decrementar el valor del input
-    function incrementHours(step) {
-      const input = document.getElementById('hours-input');
-      const currentValue = parseInt(input.value) || 24;
-      const newValue = Math.max(1, Math.min(168, currentValue + step)); // Min 1, Max 168
-      input.value = newValue;
-    }
 
     // Modificar la función generateChart para usar el input number
     function generateChart() {
