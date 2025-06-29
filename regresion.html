@@ -113,90 +113,115 @@
       display: flex;
       gap: 1rem;
       align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
     }
 
-    select, input {
-      padding: 0.5rem;
+    select {
+      padding: 0.8rem 1rem;
       font-size: 1rem;
       background-color: #1f1f1f;
       color: #fff;
       border: 1px solid #444;
-      border-radius: 6px;
-    }
-
-    button {
-      padding: 0.5rem 1rem;
-      background-color: #3f51b5;
-      color: white;
-      border: none;
-      border-radius: 6px;
+      border-radius: 8px;
+      min-width: 200px;
+      appearance: none;
+      background-image: url('data:image/svg+xml;utf8,<svg fill="white" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+      background-repeat: no-repeat;
+      background-position: right 10px center;
       cursor: pointer;
       transition: all 0.3s ease;
     }
 
+    select:focus {
+      outline: none;
+      border-color: var(--main-color, #3f51b5);
+      box-shadow: 0 0 0 2px rgba(63, 81, 181, 0.2);
+    }
+
+    button {
+      padding: 0.8rem 2rem;
+      background-color: var(--main-color, #3f51b5);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+
     button:hover {
-      background-color: #303f9f;
+      background-color: var(--hover-color, #303f9f);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     }
 
     .chart {
       background-color: #1e1e1e;
-      padding: 1rem;
+      padding: 1.5rem;
       border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
       margin-bottom: 2rem;
+      border-left: 4px solid var(--main-color, #3f51b5);
+      transition: all 0.3s ease;
+    }
+
+    .chart:hover {
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.7);
+      transform: translateY(-3px);
     }
 
     .chart img {
       width: 100%;
-      max-height: 400px;
+      max-height: 500px;
       object-fit: contain;
-    }
-
-    .prediction-result {
-      background-color: #1e1e1e;
-      padding: 1rem;
-      border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.5);
-    }
-
-    .prediction-result h3 {
-      margin-top: 0;
-    }
-
-    .price-prediction {
-      font-size: 2rem;
-      font-weight: bold;
-      margin: 1rem 0;
-    }
-
-    .confidence {
-      font-size: 0.9rem;
-      color: #999;
-    }
-
-    .metrics {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 1rem;
-      margin-top: 1.5rem;
-    }
-
-    .metric {
-      background-color: #252525;
-      padding: 1rem;
       border-radius: 8px;
+    }
+
+    .title {
       text-align: center;
+      font-size: 2rem;
+      margin-bottom: 2rem;
     }
 
-    .metric-value {
-      font-size: 1.2rem;
-      font-weight: bold;
+    .section-divider {
+      margin: 20px auto 35px;
+      position: relative;
+      height: 5px;
+      max-width: 300px;
+      background: linear-gradient(to right, transparent, rgba(63, 81, 181, 0.5), transparent);
+    }
+    
+    /* Estado vacío */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 1rem;
+      min-height: 300px;
+      text-align: center;
+      background-color: rgba(30, 30, 30, 0.7);
+      border-radius: 12px;
+    }
+
+    .empty-state-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      color: #555;
+    }
+
+    .empty-state h3 {
       margin: 0.5rem 0;
+      font-size: 1.5rem;
+      color: #ccc;
     }
 
-    .metric-name {
-      font-size: 0.8rem;
-      color: #999;
+    .empty-state p {
+      color: #888;
+      max-width: 80%;
+      margin: 0.5rem auto;
     }
   </style>
 </head>
@@ -214,6 +239,9 @@
   </header>
 
   <div class="container">
+    <div class="title">Análisis de Regresión</div>
+    <div class="section-divider"></div>
+    
     <div class="crypto-info" id="crypto-info">
       <!-- Info de criptomoneda seleccionada -->
     </div>
@@ -230,36 +258,15 @@
         <option value="tron">Tron (TRX)</option>
         <option value="hyperliquid">Hyperliquid (HYP)</option>
       </select>
-      <label>
-        Predecir precio en
-        <input type="number" id="days" min="1" max="30" value="7" style="width: 60px;">
-        días
-      </label>
-      <button id="predict-btn">Predecir precio</button>
-    </div>
-
-    <div class="chart">
-      <img id="regression-chart" src="http://localhost:8080/regression?coin=bitcoin&days=7" alt="Gráfico de regresión">
-    </div>
-
-    <div class="prediction-result">
-      <h3>Predicción de precio</h3>
-      <div class="price-prediction" id="predicted-price">$29,433.15</div>
-      <div class="confidence">Basado en análisis de tendencia con 87% de confianza</div>
       
-      <div class="metrics">
-        <div class="metric">
-          <div class="metric-value" id="mse">0.025</div>
-          <div class="metric-name">Error cuadrático medio</div>
-        </div>
-        <div class="metric">
-          <div class="metric-value" id="r-squared">0.87</div>
-          <div class="metric-name">Coeficiente R²</div>
-        </div>
-        <div class="metric">
-          <div class="metric-value" id="trend">Positiva</div>
-          <div class="metric-name">Tendencia</div>
-        </div>
+      <button id="generate-btn">Generar Gráfico</button>
+    </div>
+
+    <div class="chart" id="chart-container">
+      <div class="empty-state" id="empty-state">
+        <div class="empty-state-icon">📈</div>
+        <h3>Selecciona una criptomoneda</h3>
+        <p>Elige una criptomoneda para ver su análisis de regresión y tendencia futura</p>
       </div>
     </div>
   </div>
@@ -277,7 +284,8 @@
       console.log(`Mostrando regresión para: ${coinId}`);
       
       // Aplicar color de la criptomoneda a elementos de la página
-      applyThemeColor(coinColor);
+      document.documentElement.style.setProperty('--main-color', coinColor);
+      document.documentElement.style.setProperty('--hover-color', adjustColorBrightness(coinColor, -20));
       
       // Actualizar el selector de monedas
       document.getElementById('coin-select').value = coinId;
@@ -290,63 +298,58 @@
         updateCryptoInfoFromId(coinId);
       }
       
-      // Actualizar la imagen del gráfico de regresión
-      const days = document.getElementById('days').value;
-      updateRegressionChart(coinId, days);
-      
-      // Configurar listeners de eventos
-      document.getElementById('coin-select').addEventListener('change', (e) => {
-        const selectedCoin = e.target.value;
-        const days = document.getElementById('days').value;
-        updateRegressionChart(selectedCoin, days);
+      // Configurar listener para el botón de generar gráfico
+      document.getElementById('generate-btn').addEventListener('click', () => {
+        const selectedCoin = document.getElementById('coin-select').value;
+        generateRegressionChart(selectedCoin);
         updateCryptoInfoFromId(selectedCoin);
       });
       
-      document.getElementById('predict-btn').addEventListener('click', () => {
-        const selectedCoin = document.getElementById('coin-select').value;
-        const days = document.getElementById('days').value;
-        updateRegressionChart(selectedCoin, days);
-        // Aquí también podrías actualizar los valores de predicción con una llamada a la API
+      // Configurar listener para el selector de monedas
+      document.getElementById('coin-select').addEventListener('change', (e) => {
+        updateCryptoInfoFromId(e.target.value);
       });
-      
-      // Inicialmente mostrar la predicción para la moneda seleccionada
-      fetchPredictionData(coinId, days);
     });
     
-    // Función para aplicar el color de la criptomoneda a los elementos de la página
-    function applyThemeColor(color) {
-      const style = document.createElement('style');
-      style.textContent = `
-        button {
-          background-color: ${color};
-        }
-        
-        button:hover {
-          background-color: ${adjustColorBrightness(color, -20)};
-        }
-        
-        header nav a::after {
-          background: linear-gradient(to right, ${color}, ${adjustColorBrightness(color, -20)});
-        }
-        
-        .chart {
-          border-left: 4px solid ${color};
-        }
-        
-        .prediction-result {
-          border-left: 4px solid ${color};
-        }
-        
-        .price-prediction {
-          color: ${color};
-        }
-        
-        .crypto-info img {
-          box-shadow: 0 0 10px ${color}80;
-        }
+    // Función para generar el gráfico de regresión
+    function generateRegressionChart(coinId) {
+      const chartContainer = document.getElementById('chart-container');
+      
+      // Mostrar indicador de carga
+      chartContainer.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">⏳</div>
+          <h3>Generando análisis</h3>
+          <p>Calculando regresión y tendencias para ${coinId}...</p>
+        </div>
       `;
       
-      document.head.appendChild(style);
+      // Crear una nueva imagen
+      const img = new Image();
+      img.id = 'regression-chart';
+      img.alt = 'Gráfico de regresión';
+      
+      // Configurar eventos para la carga de la imagen
+      img.onload = function() {
+        // Cuando la imagen se cargue, reemplazar el estado de carga con la imagen
+        chartContainer.innerHTML = '';
+        chartContainer.appendChild(img);
+      };
+      
+      img.onerror = function() {
+        // Si hay un error al cargar la imagen, mostrar un mensaje de error
+        chartContainer.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">❌</div>
+            <h3>Error al cargar el gráfico</h3>
+            <p>No se pudieron obtener los datos. Por favor verifica que el servidor esté funcionando.</p>
+            <button onclick="generateRegressionChart('${coinId}')" style="margin-top: 1rem;">Intentar de nuevo</button>
+          </div>
+        `;
+      };
+      
+      // Establecer la URL de la imagen (días fijo a 7)
+      img.src = `http://localhost:8080/regression?coin=${coinId}&days=7`;
     }
     
     // Función para actualizar el elemento crypto-info con los datos proporcionados
@@ -429,41 +432,11 @@
       };
       
       // Aplicar el color del tema
-      applyThemeColor(info.color);
+      document.documentElement.style.setProperty('--main-color', info.color);
+      document.documentElement.style.setProperty('--hover-color', adjustColorBrightness(info.color, -20));
       
       // Actualizar la interfaz con la información de la criptomoneda
       updateCryptoInfoElement(info.icon, info.name, info.symbol);
-    }
-    
-    // Función para actualizar el gráfico de regresión
-    function updateRegressionChart(coinId, days) {
-      document.getElementById('regression-chart').src = `http://localhost:8080/regression?coin=${coinId}&days=${days}`;
-    }
-    
-    // Función para obtener datos de predicción del servidor
-    function fetchPredictionData(coinId, days) {
-      fetch(`http://localhost:8080/regression?coin=${coinId}&days=${days}&data=true`)
-        .then(res => {
-          if (!res.ok) {
-            throw new Error(`Error HTTP ${res.status}`);
-          }
-          return res.json();
-        })
-        .then(data => {
-          // Actualizar los elementos de la interfaz con los datos recibidos
-          document.getElementById('predicted-price').textContent = `$${data.prediction.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-          document.getElementById('mse').textContent = data.mse.toFixed(3);
-          document.getElementById('r-squared').textContent = data.r_squared.toFixed(2);
-          document.getElementById('trend').textContent = data.trend;
-          
-          // Actualizar el nivel de confianza
-          document.querySelector('.confidence').textContent = `Basado en análisis de tendencia con ${Math.round(data.r_squared * 100)}% de confianza`;
-        })
-        .catch(error => {
-          console.error("Error al obtener datos de predicción:", error);
-          // Mostrar mensaje de error
-          document.getElementById('predicted-price').textContent = "Error al cargar predicción";
-        });
     }
     
     // Función para ajustar el brillo de un color (para los efectos hover)

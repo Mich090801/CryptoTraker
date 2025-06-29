@@ -12,29 +12,80 @@
       padding: 0;
     }
 
+    /* Estilos para el logo y el encabezado */
     header {
-      background-color: #1f1f1f;
+      background: linear-gradient(to right, #1a1a1a, #2d2d2d);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid #383838;
+    }
+
+    .logo-container {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 1rem 2rem;
+      gap: 0.8rem;
+    }
+
+    .logo-container img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: contain;
+      filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.2));
     }
 
     header h1 {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      font-size: 1.5rem;
+      font-size: 1.6rem;
+      font-weight: 600;
+      margin: 0;
+      background: linear-gradient(to right, #fff, #ccc);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    header nav {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
     header nav a {
       color: #ccc;
-      margin: 0 1rem;
+      margin: 0 1.2rem;
       text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      position: relative;
+      padding: 6px 0;
+    }
+
+    header nav a::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(to right, #9c27b0, #3f51b5);
+      transition: width 0.3s ease;
     }
 
     header nav a:hover {
       color: #fff;
+    }
+
+    header nav a:hover::after {
+      width: 100%;
     }
 
     .container {
@@ -57,17 +108,27 @@
       height: 50px;
     }
 
-    .select-hours {
+    .controls {
       margin-bottom: 1.5rem;
     }
 
-    .select-hours select {
+    .controls select, .controls button {
       padding: 0.5rem;
       font-size: 1rem;
       background-color: #1f1f1f;
       color: #fff;
       border: 1px solid #444;
       border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .controls button {
+      background-color: #3f51b5;
+      border: none;
+    }
+
+    .controls button:hover {
+      background-color: #5c6bc0;
     }
 
     .chart {
@@ -106,12 +167,196 @@
     tr:nth-child(odd) {
       background-color: #222;
     }
+
+    /* Estilo mejorado para el input numérico */
+    .number-input-container {
+      display: flex;
+      align-items: stretch;
+      background-color: #222;
+      border-radius: 24px;
+      border: 1px solid #333;
+      overflow: hidden;
+      width: 140px;
+      height: 42px;
+      margin-right: 1rem;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+      transition: all 0.2s ease;
+    }
+    
+    .number-input-container:focus-within {
+      border-color: var(--coin-color, #3f51b5);
+      box-shadow: 0 0 0 2px rgba(63, 81, 181, 0.1);
+      transform: translateY(-1px);
+    }
+    
+    .number-input {
+      width: 100%;
+      background-color: transparent;
+      border: none;
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 500;
+      padding: 0 0.5rem;
+      text-align: center;
+      -moz-appearance: textfield; /* Firefox */
+    }
+    
+    .number-input::-webkit-outer-spin-button,
+    .number-input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    
+    .number-input:focus {
+      outline: none;
+    }
+    
+    .number-controls {
+      display: flex;
+      flex-direction: column;
+      border-left: 1px solid #333;
+      width: 28px;
+      flex-shrink: 0; /* Evitar que se encoja */
+    }
+    
+    .number-control-btn {
+      background-color: #2d2d2d;
+      border: none;
+      color: #999;
+      padding: 0;
+      height: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      position: relative; /* Para posicionar los íconos */
+      line-height: 1; /* Normalizar la altura de línea */
+    }
+    
+    .number-control-btn:hover {
+      background-color: var(--coin-color, #3f51b5);
+      color: white;
+    }
+    
+    .number-control-btn:first-child {
+      border-bottom: 1px solid #333;
+    }
+
+    /* Estilo refinado para las flechas */
+    .arrow-up::before {
+      content: '';
+      display: block;
+      width: 0;
+      height: 0;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+      border-bottom: 4px solid currentColor;
+    }
+    
+    .arrow-down::before {
+      content: '';
+      display: block;
+      width: 0;
+      height: 0;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+      border-top: 4px solid currentColor;
+    }
+
+    /* Etiqueta para horas */
+    .hours-label {
+      position: absolute;
+      font-size: 0.7rem;
+      color: #999;
+      bottom: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+    }
+    
+    .hours-container {
+      position: relative;
+    }
+    
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 1.5rem 0;
+    }
+    
+    /* Modernizar el botón de actualizar */
+    #update-btn {
+      background-color: var(--coin-color, #3f51b5);
+      color: white;
+      border: none;
+      border-radius: 24px;
+      padding: 0.65rem 1.4rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+    }
+    
+    #update-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      background-color: var(--coin-hover-color, #303f9f);
+    }
+    
+    #update-btn:active {
+      transform: translateY(0);
+    }
+
+    /* Etiqueta para horas */
+    .hours-label {
+      position: absolute;
+      font-size: 0.7rem;
+      color: #999;
+      bottom: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+    }
+
+    /* Eliminar las flechas con ::after que están causando duplicados */
+    .arrow-up::after,
+    .arrow-down::after {
+      content: none; /* Eliminar el contenido de ::after */
+    }
+
+    /* Mantener solo las flechas con ::before que están bien centradas */
+    .arrow-up::before {
+      content: '';
+      display: block;
+      width: 0;
+      height: 0;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+      border-bottom: 4px solid currentColor;
+    }
+    
+    .arrow-down::before {
+      content: '';
+      display: block;
+      width: 0;
+      height: 0;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+      border-top: 4px solid currentColor;
+    }
   </style>
 </head>
 <body>
 
   <header>
-    <h1>🪙 CryptoTracker</h1>
+    <div class="logo-container">
+      <img src="assets/logo.png" alt="CryptoTracker Logo" />
+      <h1>CryptoTracker</h1>
+    </div>
     <nav>
       <a href="index.html">Inicio</a>
       <a href="comparar.html">Comparación</a>
@@ -125,15 +370,27 @@
       <h2 id="coin-name">Bitcoin (BTC)</h2>
     </div>
 
-    <div class="select-hours">
-      <label for="range">Selecciona un rango de horas:</label>
-      <select id="range">
-        <option value="1">Última 1 hora</option>
-        <option value="3">Últimas 3 horas</option>
-        <option value="6">Últimas 6 horas</option>
-        <option value="12">Últimas 12 horas</option>
-        <option value="24" selected>Últimas 24 horas</option>
-      </select>
+    <div class="controls">
+      <div class="hours-container">
+        <div class="number-input-container">
+          <input 
+            type="number" 
+            id="hours-input" 
+            min="1" 
+            max="168" 
+            value="24" 
+            class="number-input"
+            title="Selecciona entre 1 y 168 horas"
+          >
+          <div class="number-controls">
+            <button type="button" class="number-control-btn arrow-up" onclick="incrementHours(1)"></button>
+            <button type="button" class="number-control-btn arrow-down" onclick="incrementHours(-1)"></button>
+          </div>
+        </div>
+        <span class="hours-label">horas</span>
+      </div>
+      
+      <button id="update-btn">Actualizar</button>
     </div>
 
     <div class="chart">
@@ -174,17 +431,23 @@
       }
       
       // Actualizar la imagen del gráfico con la criptomoneda seleccionada
-      const rangeSelect = document.getElementById('range');
+      const rangeSelect = document.getElementById('interval-select');
       const hours = rangeSelect.value;
       document.getElementById('chart-img').src = `http://localhost:8080/chart?coin=${coinId}&hours=${hours}`;
       
-      // Configurar el event listener para el cambio de rango
-      rangeSelect.addEventListener('change', () => {
-        const updatedHours = rangeSelect.value;
-        document.getElementById('chart-img').src = `http://localhost:8080/chart?coin=${coinId}&hours=${updatedHours}`;
+      // Configurar el event listener para el cambio de intervalo
+      document.getElementById('update-btn').addEventListener('click', function() {
+        const hoursInput = document.getElementById('hours-input');
+        const hours = parseInt(hoursInput.value);
         
-        // También actualizar los datos históricos cuando cambia el rango
-        loadHistoricalData(coinId, updatedHours);
+        // Validar el rango de horas
+        if (hours < 1 || hours > 168) {
+          alert('Por favor selecciona un intervalo entre 1 y 168 horas.');
+          hoursInput.value = 24;
+          return;
+        }
+        
+        updateChart(coinId, hours);
       });
       
       // Cargar los datos históricos inicialmente
@@ -360,6 +623,14 @@
       
       // Actualizar el título de la página
       document.title = `${info.name} (${info.symbol}) - Historial | CryptoTracker`;
+    }
+    
+    // Añadir esta función para incrementar/decrementar el valor del input
+    function incrementHours(step) {
+      const input = document.getElementById('hours-input');
+      const currentValue = parseInt(input.value) || 24;
+      const newValue = Math.max(1, Math.min(168, currentValue + step)); // Min 1, Max 168
+      input.value = newValue;
     }
   </script>
 
